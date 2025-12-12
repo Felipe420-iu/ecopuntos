@@ -434,7 +434,7 @@ def registrate(request):
                     print(f"Error creando logro: {logro_error}")
                 
                 messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión.')
-                return redirect('login')
+                return redirect('iniciosesion')
             
             # Con verificación de email - intentar enviar
             user.is_active = False
@@ -485,7 +485,7 @@ def registrate(request):
                         print(f"Error creando logro: {logro_error}")
                     
                     messages.warning(request, 'Registro exitoso. El email de verificación no pudo enviarse, pero tu cuenta ha sido activada. Ya puedes iniciar sesión.')
-                    return redirect('login')
+                    return redirect('iniciosesion')
                     
             except Exception as email_error:
                 # Error crítico en envío de email - activar usuario como fallback
@@ -507,7 +507,7 @@ def registrate(request):
                     print(f"Error creando logro: {logro_error}")
                 
                 messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión.')
-                return redirect('login')
+                return redirect('iniciosesion')
                 
         except Exception as e:
             messages.error(request, f'Error al registrar usuario: {str(e)}')

@@ -420,7 +420,7 @@ class FlujoSeguridadTest(IntegracionTestCase):
         # 1. Usuario inicia sesión
         self.client.logout()
         
-        response = self.client.post(reverse('login'), {
+        response = self.client.post(reverse('iniciosesion'), {
             'username': 'usuario_regular',
             'password': 'password123'
         })
