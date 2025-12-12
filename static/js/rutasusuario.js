@@ -69,8 +69,6 @@ function setupFormSubmit() {
         tempForm.submit();
     });
 }
-    });
-}
 
 // ==========================================
 // MODAL DE DIRECCIÓN
