@@ -435,24 +435,58 @@
                                     {% for route in routes %}
                                         <tr>
                             <td>{{ route.id }}</td>
-                                            <td>{{ route.fecha|date:"d/m/Y" }}</td>
-                                            <td>{{ route.hora|time:"H:i" }}</td>
-                                            <td>{{ route.barrio }}</td>
-                                            <td>{{ route.referencia }}</td>
-                                            <td>{{ route.direccion }}</td>
+                                            <td>
+                                                {% if route.fecha_programada %}
+                                                    {{ route.fecha_programada|date:"d/m/Y" }}
+                                                {% else %}
+                                                    {{ route.fecha|date:"d/m/Y" }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if route.hora_inicio %}
+                                                    {{ route.hora_inicio|time:"H:i" }}
+                                                {% else %}
+                                                    {{ route.hora|time:"H:i" }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if route.nombre %}
+                                                    {{ route.nombre }}
+                                                {% else %}
+                                                    {{ route.barrio }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if route.notas %}
+                                                    {{ route.notas }}
+                                                {% else %}
+                                                    {{ route.referencia }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if route.direccion_inicio %}
+                                                    {{ route.direccion_inicio }}
+                                                {% else %}
+                                                    {{ route.direccion }}
+                                                {% endif %}
+                                            </td>
                                             <td>
                                                 <span class="badge 
-                                                    {% if route.estado == 'pendiente' %}bg-warning
-                                                    {% elif route.estado == 'confirmada' %}bg-success
-                                                    {% elif route.estado == 'rechazada' %}bg-danger
+                                                    {% if route.estado == 'pendiente' or route.estado == 'planificada' %}bg-warning
+                                                    {% elif route.estado == 'confirmada' or route.estado == 'programada' %}bg-success
+                                                    {% elif route.estado == 'rechazada' or route.estado == 'cancelada' %}bg-danger
                                                     {% elif route.estado == 'reagendada' %}bg-info
-                                                    {% elif route.estado == 'completada' %}bg-secondary
+                                                    {% elif route.estado == 'completada' or route.estado == 'en_curso' %}bg-secondary
                                                     {% endif %}">
-                                                    {{ route.get_estado_display }}
+                                                    {% if route.get_estado_display %}
+                                                        {{ route.get_estado_display }}
+                                                    {% else %}
+                                                        {{ route.estado|title }}
+                                                    {% endif %}
                                                 </span>
                                             </td>
                             <td>
-                                {% if route.estado == 'pendiente' %}
+                                {% if route.estado == 'pendiente' or route.estado == 'planificada' %}
                                     <button type="button" class="btn btn-success btn-sm me-1 btn-confirmar-ruta" 
                                             data-ruta-id="{{ route.id }}" 
                                             title="Confirmar">
@@ -466,18 +500,19 @@
                                     <button type="button" class="btn btn-info btn-sm me-1" 
                                             data-bs-toggle="modal" data-bs-target="#reagendarModal"
                                             data-id="{{ route.id }}"
-                                            data-fecha="{{ route.fecha|date:"Y-m-d" }}"
-                                            data-hora="{{ route.hora|time:"H:i" }}"
+                                            data-fecha="{% if route.fecha_programada %}{{ route.fecha_programada|date:'Y-m-d' }}{% else %}{{ route.fecha|date:'Y-m-d' }}{% endif %}"
+                                            data-hora="{% if route.hora_inicio %}{{ route.hora_inicio|time:'H:i' }}{% else %}{{ route.hora|time:'H:i' }}{% endif %}"
                                             title="Reagendar">
                                         <i class="fas fa-calendar-alt"></i>
                                     </button>
                                 {% endif %}
+                                {% if not user.role == 'conductor' %}
                                 <button type="button" class="btn btn-primary btn-sm me-1 edit-btn" 
                                         data-bs-toggle="modal" data-bs-target="#editRouteModal"
                                         data-id="{{ route.id }}"
-                                        data-fecha="{{ route.fecha|date:"Y-m-d" }}"
-                                        data-hora="{{ route.hora|time:"H:i" }}"
-                                        data-barrio="{{ route.barrio }}"
+                                        data-fecha="{% if route.fecha_programada %}{{ route.fecha_programada|date:'Y-m-d' }}{% else %}{{ route.fecha|date:'Y-m-d' }}{% endif %}"
+                                        data-hora="{% if route.hora_inicio %}{{ route.hora_inicio|time:'H:i' }}{% else %}{{ route.hora|time:'H:i' }}{% endif %}"
+                                        data-barrio="{% if route.nombre %}{{ route.nombre }}{% else %}{{ route.barrio }}{% endif %}"
                                         data-referencia="{{ route.referencia }}"
                                         data-direccion="{{ route.direccion }}"
                                         title="Editar">
