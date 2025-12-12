@@ -2780,20 +2780,31 @@ def rutas(request):
     
     # Filtrar rutas según el rol
     if request.user.role == 'conductor':
-        # Para conductores: mostrar TODAS las RutaRecoleccion sin filtros
+        # Para conductores: mostrar TODAS las rutas (RutaRecoleccion Y Ruta)
+        routes = []
         try:
-            routes = RutaRecoleccion.objects.all().order_by('-fecha_creacion')
-        except:
-            # Fallback a modelo Ruta si RutaRecoleccion no existe o tiene problemas
-            routes = Ruta.objects.all().order_by('-fecha_creacion')
+            rutas_recoleccion = list(RutaRecoleccion.objects.all().order_by('-id'))
+            routes.extend(rutas_recoleccion)
+            print(f"[DEBUG] RutaRecoleccion encontradas: {len(rutas_recoleccion)}")
+        except Exception as e:
+            print(f"[DEBUG] Error con RutaRecoleccion: {e}")
+        
+        try:
+            rutas_normales = list(Ruta.objects.all().order_by('-id'))
+            routes.extend(rutas_normales)
+            print(f"[DEBUG] Ruta normales encontradas: {len(rutas_normales)}")
+        except Exception as e:
+            print(f"[DEBUG] Error con Ruta: {e}")
+        
+        print(f"[DEBUG] Total rutas para conductor: {len(routes)}")
     else:
         # Admins y superusers ven todas las rutas
         try:
-            routes = RutaRecoleccion.objects.all().order_by('-fecha_creacion')
+            routes = RutaRecoleccion.objects.all().order_by('-id')
             if not routes.exists():
-                routes = Ruta.objects.all().order_by('-fecha_creacion')
+                routes = Ruta.objects.all().order_by('-id')
         except:
-            routes = Ruta.objects.all().order_by('-fecha_creacion')
+            routes = Ruta.objects.all().order_by('-id')
     
     context = {
         'show_integrated_view': True,
