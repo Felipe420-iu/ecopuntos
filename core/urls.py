@@ -185,12 +185,10 @@ urlpatterns = [
     
     # URLs de integración removidas - funcionalidad integrada en canjes y rutas principales
     
-    # Gestión de Rutas para Conductores (temporalmente deshabilitado por hotfix)
-    # Las rutas relacionadas con asignación de rutas a conductores se deshabilitaron temporalmente
-    # mientras se estabiliza el despliegue en producción.
-    #path('admin/conductores/asignar-ruta/<int:conductor_id>/', views.asignar_ruta_conductor, name='asignar_ruta_conductor'),
-    #path('api/conductores/<int:conductor_id>/rutas/', views.get_rutas_disponibles, name='get_rutas_disponibles'),
-    #path('api/conductores/<int:conductor_id>/asignar-ruta/', views.api_asignar_ruta_conductor, name='api_asignar_ruta_conductor'),
+    # Gestión de Rutas para Conductores
+    path('admin/conductores/asignar-ruta/<int:conductor_id>/', views.asignar_ruta_conductor, name='asignar_ruta_conductor'),
+    path('api/conductores/<int:conductor_id>/rutas/', views.get_rutas_disponibles, name='get_rutas_disponibles'),
+    path('api/conductores/<int:conductor_id>/asignar-ruta/', views.api_asignar_ruta_conductor, name='api_asignar_ruta_conductor'),
     
     # URLs del Superusuario
     path('superuser/', views_superuser.panel_superuser, name='panel_superuser'),
