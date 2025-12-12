@@ -4478,6 +4478,27 @@ def agendar_ruta_usuario(request):
                 elif mat.get('peso', 0) > 0:
                     # Es material manual (si aún existe esta opción)
                     materiales_str += f"{mat['tipo'].capitalize()}: {mat['peso']}kg, "
+
+            # Compatibilidad: también aceptar selección directa de checkboxes 'canjes[]'
+            # del formulario (sin JSON 'materiales_seleccionados')
+            canjes_ids_form = request.POST.getlist('canjes[]')
+            if canjes_ids_form:
+                # Unificar IDs evitando duplicados
+                existing = set(str(cid) for cid in canjes_ids)
+                for cid in canjes_ids_form:
+                    if str(cid) not in existing:
+                        canjes_ids.append(cid)
+                # Si no se construyó materiales_str desde JSON, construirlo desde BD
+                if not materiales_str:
+                    try:
+                        seleccionados = Canje.objects.filter(
+                            id__in=canjes_ids_form,
+                            usuario=request.user
+                        ).select_related('material')
+                        for c in seleccionados:
+                            materiales_str += f"{c.material.nombre}: {c.peso}kg ({c.puntos} puntos), "
+                    except Exception as e:
+                        print(f"Error construyendo materiales_str desde canjes[]: {e}")
             
             # Limpiar la coma final
             materiales_str = materiales_str.rstrip(', ')
@@ -4523,18 +4544,19 @@ def agendar_ruta_usuario(request):
             except Exception as e:
                 print(f"Error creando RutaRecoleccion: {e}")
             
-            return JsonResponse({
-                'success': True, 
-                'message': '¡Tu solicitud de recolección ha sido enviada exitosamente! Te contactaremos pronto.'
-            })
+            # Añadir mensaje de éxito y redireccionar
+            from django.contrib import messages
+            messages.success(request, '¡Tu solicitud de recolección ha sido enviada exitosamente! Te contactaremos pronto.')
+            return redirect('rutasusuario')
         except Exception as e:
             print(f"Error en agendar_ruta_usuario: {e}")
-            return JsonResponse({
-                'success': False, 
-                'message': 'Error al procesar la solicitud. Por favor inténtalo de nuevo.'
-            })
+            from django.contrib import messages
+            messages.error(request, 'Error al procesar la solicitud. Por favor inténtalo de nuevo.')
+            return redirect('rutasusuario')
     
-    return JsonResponse({'success': False, 'message': 'Método no permitido.'})
+    from django.contrib import messages
+    messages.error(request, 'Método no permitido.')
+    return redirect('rutasusuario')
 
 @login_required
 def ranking(request):

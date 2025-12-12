@@ -25,12 +25,15 @@ function setupFormSubmit() {
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Construir FormData con los datos del formulario
+        // Validar el formulario antes de enviar
+        if (!validateStep(4)) {
+            return;
+        }
+        
+        // Asegurar que los canjes seleccionados estén en el formulario
         const formData = new FormData(form);
         
-        // Agregar los IDs de canjes seleccionados al FormData
-        // Limpiar canjes[] si existen
-        const currentCanjesArray = formData.getAll('canjes[]');
+        // Limpiar canjes[] existentes
         formData.delete('canjes[]');
         
         // Agregar cada canje seleccionado
@@ -38,16 +41,34 @@ function setupFormSubmit() {
             formData.append('canjes[]', canje.id);
         });
         
-        // Agregar la dirección completa
-        formData.set('direccion', direccionCompleta);
+        // Asegurar que la dirección esté incluida
+        if (direccionCompleta) {
+            formData.set('direccion', direccionCompleta);
+        }
         
         console.log('[DEBUG] FormData a enviar:');
         for (let [key, value] of formData.entries()) {
             console.log(`  ${key}: ${value}`);
         }
         
-        // Enviar el formulario
-        form.submit();
+        // Crear un formulario temporal con todos los datos y enviarlo
+        const tempForm = document.createElement('form');
+        tempForm.method = 'POST';
+        tempForm.action = form.action;
+        
+        // Copiar todos los datos al formulario temporal
+        for (let [key, value] of formData.entries()) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            tempForm.appendChild(input);
+        }
+        
+        document.body.appendChild(tempForm);
+        tempForm.submit();
+    });
+}
     });
 }
 
