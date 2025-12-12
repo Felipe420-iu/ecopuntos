@@ -289,80 +289,8 @@ def delete_user(request, user_id):
 
 def index(request):
     from .models import Usuario
-    from django.db.models import Sum, Count
-    
     testimonios = Usuario.usuarios_con_testimonio()[:12]  # Limitar a 12 testimonios
-    
-    # Calcular estadísticas reales
-    total_usuarios = Usuario.objects.filter(is_active=True).count()
-    total_canjes = Canje.objects.all().count()
-    
-    # Total de materiales reciclados (suma de pesos de todos los canjes aprobados)
-    total_materiales = Canje.objects.filter(estado='aprobado').aggregate(
-        total_peso=Sum('peso')
-    )['total_peso'] or 0
-    
-    # Total en recompensas (suma de puntos de todos los canjes aprobados)
-    total_puntos = Canje.objects.filter(estado='aprobado').aggregate(
-        total_puntos=Sum('puntos')
-    )['total_puntos'] or 0
-    
-    # Estadísticas por tipo de material
-    plasticos_reciclados = Canje.objects.filter(
-        estado='aprobado', 
-        material__nombre__icontains='plástico'
-    ).aggregate(total_peso=Sum('peso'))['total_peso'] or 0
-    
-    vidrio_reciclado = Canje.objects.filter(
-        estado='aprobado', 
-        material__nombre__icontains='vidrio'
-    ).aggregate(total_peso=Sum('peso'))['total_peso'] or 0
-    
-    papel_reciclado = Canje.objects.filter(
-        estado='aprobado', 
-        material__nombre__icontains='papel'
-    ).aggregate(total_peso=Sum('peso'))['total_peso'] or 0
-    
-    metales_reciclados = Canje.objects.filter(
-        estado='aprobado', 
-        material__nombre__icontains='metal'
-    ).aggregate(total_peso=Sum('peso'))['total_peso'] or 0
-    
-    # Convertir a formato amigable para mostrar
-    if total_usuarios >= 1000:
-        usuarios_display = f"{total_usuarios // 1000}K+"
-    else:
-        usuarios_display = f"{total_usuarios}+"
-    
-    if total_materiales >= 1000:
-        materiales_display = f"{int(total_materiales // 1000)}K+"
-    else:
-        materiales_display = f"{int(total_materiales)}+"
-    
-    if total_puntos >= 1000:
-        puntos_display = f"{total_puntos // 1000}K"
-    else:
-        puntos_display = f"{total_puntos}"
-    
-    # Estimación de árboles salvados (1 tonelada de papel reciclado = ~17 árboles)
-    arboles_salvados = int((papel_reciclado / 1000) * 17)
-    
-    context = {
-        'testimonios': testimonios,
-        'estadisticas': {
-            'usuarios_activos': usuarios_display,
-            'materiales_reciclados': materiales_display,
-            'puntos_recompensas': puntos_display,
-        },
-        'impacto': {
-            'arboles_salvados': arboles_salvados,
-            'plasticos_reciclados': int(plasticos_reciclados),
-            'vidrio_reciclado': int(vidrio_reciclado),
-            'metales_reciclados': int(metales_reciclados),
-        }
-    }
-    
-    return render(request, 'core/index.html', context)
+    return render(request, 'core/index.html', {'testimonios': testimonios})
 
 def terminos_condiciones(request):
     """Vista para mostrar los términos y condiciones"""
@@ -434,7 +362,7 @@ def registrate(request):
                     print(f"Error creando logro: {logro_error}")
                 
                 messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión.')
-                return redirect('iniciosesion')
+                return redirect('login')
             
             # Con verificación de email - intentar enviar
             user.is_active = False
@@ -485,7 +413,7 @@ def registrate(request):
                         print(f"Error creando logro: {logro_error}")
                     
                     messages.warning(request, 'Registro exitoso. El email de verificación no pudo enviarse, pero tu cuenta ha sido activada. Ya puedes iniciar sesión.')
-                    return redirect('iniciosesion')
+                    return redirect('login')
                     
             except Exception as email_error:
                 # Error crítico en envío de email - activar usuario como fallback
@@ -507,7 +435,7 @@ def registrate(request):
                     print(f"Error creando logro: {logro_error}")
                 
                 messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión.')
-                return redirect('iniciosesion')
+                return redirect('login')
                 
         except Exception as e:
             messages.error(request, f'Error al registrar usuario: {str(e)}')
@@ -1577,8 +1505,16 @@ def recompensas(request):
     solo_disponibles = request.GET.get('solo_disponibles') == 'true'
     solo_favoritos = request.GET.get('solo_favoritos') == 'true'
     
-    # Filtrar recompensas
-    recompensas = Recompensa.objects.filter(activa=True)
+    # Filtrar recompensas (excluir retiros en efectivo)
+    recompensas = Recompensa.objects.filter(activa=True).exclude(
+        Q(nombre__icontains='cop') | 
+        Q(nombre__icontains='retiro') | 
+        Q(nombre__icontains='dinero') |
+        Q(nombre__icontains='efectivo') |
+        Q(nombre__icontains='$') |
+        Q(descripcion__icontains='retiro de dinero') |
+        Q(descripcion__icontains='retiro en efectivo')
+    )
     
     if categoria_id:
         recompensas = recompensas.filter(categoria_id=categoria_id)
@@ -2674,6 +2610,8 @@ def estadisticasadmin(request):
     return render(request, 'core/estadisticasadmin.html', context)
 
 def rutas(request):
+    from django.db.models import Q
+    
     # Verificar que el usuario esté autenticado
     if not request.user.is_authenticated:
         messages.error(request, 'Debes iniciar sesión para acceder a las rutas.')
@@ -2684,28 +2622,185 @@ def rutas(request):
         messages.error(request, 'No tienes permisos para acceder a esta página.')
         return redirect('inicioadmin')
     
-    # Filtrar rutas según el rol del usuario
-    if request.user.role == 'conductor':
-        # Para conductores: mostrar rutas asignadas a él Y rutas pendientes sin asignar
-        from django.db.models import Q
-        routes = RutaRecoleccion.objects.filter(
-            Q(conductor=request.user) |  # Rutas asignadas directamente al conductor
-            Q(conductor__isnull=True, estado__in=['planificada', 'programada'])  # Rutas pendientes sin conductor
+    # Información de barrios por zona de Ibagué, Tolima (sincronizada con rutasusuario.js)
+    barrios_por_zona = {
+        'zona_1_sur': {
+            'nombre': 'Zona 1 - Sur',
+            'color': '#28a745',
+            'barrios': [
+                {'nombre': 'Ricaurte Parte Alta', 'lat': 4.4100, 'lng': -75.2480},
+                {'nombre': 'Ricaurte Parte Baja', 'lat': 4.4100, 'lng': -75.2480},
+                {'nombre': 'Urb albania 2', 'lat': 4.4120, 'lng': -75.2460},
+                {'nombre': 'Miramar', 'lat': 4.4160, 'lng': -75.2380},
+                {'nombre': 'San Isidro', 'lat': 4.4140, 'lng': -75.2400},
+                {'nombre': 'Colinas del Sur', 'lat': 4.4080, 'lng': -75.2520},
+                {'nombre': 'Villa Marina', 'lat': 4.4090, 'lng': -75.2500},
+                {'nombre': 'Villa Claudia', 'lat': 4.4100, 'lng': -75.2490},
+                {'nombre': 'Villa Ilusión', 'lat': 4.4110, 'lng': -75.2470},
+                {'nombre': 'La Unión', 'lat': 4.4120, 'lng': -75.2450},
+                {'nombre': 'Brisas del Sur', 'lat': 4.4130, 'lng': -75.2440},
+                {'nombre': 'Villa Teresa', 'lat': 4.4140, 'lng': -75.2430},
+                {'nombre': 'Balcones del Sur', 'lat': 4.4150, 'lng': -75.2420},
+                {'nombre': 'San Antonio', 'lat': 4.4160, 'lng': -75.2410},
+                {'nombre': 'San Jorge', 'lat': 4.4170, 'lng': -75.2400},
+                {'nombre': 'Boquerón', 'lat': 4.4050, 'lng': -75.2550},
+                {'nombre': 'Jazmín', 'lat': 4.4060, 'lng': -75.2540},
+                {'nombre': 'El Tejar', 'lat': 4.4070, 'lng': -75.2530},
+                {'nombre': 'La Florida', 'lat': 4.4080, 'lng': -75.2520},
+                {'nombre': 'Granada', 'lat': 4.4090, 'lng': -75.2510},
+                {'nombre': 'El Refugio', 'lat': 4.4100, 'lng': -75.2500},
+                {'nombre': 'Praderas de San Mateo', 'lat': 4.4110, 'lng': -75.2490},
+            ]
+        },
+        'zona_2_centro': {
+            'nombre': 'Zona 2 - Centro',
+            'color': '#ffc107',
+            'barrios': [
+                {'nombre': 'La Libertad', 'lat': 4.4380, 'lng': -75.2330},
+                {'nombre': 'Augusto E. Medina', 'lat': 4.4390, 'lng': -75.2320},
+                {'nombre': 'Baltazar', 'lat': 4.4400, 'lng': -75.2310},
+                {'nombre': 'Centro', 'lat': 4.4389, 'lng': -75.2322},
+                {'nombre': 'Combeima', 'lat': 4.4370, 'lng': -75.2340},
+                {'nombre': 'Estación', 'lat': 4.4360, 'lng': -75.2350},
+                {'nombre': 'Interlaken', 'lat': 4.4350, 'lng': -75.2360},
+                {'nombre': 'La Pola', 'lat': 4.4370, 'lng': -75.2310},
+                {'nombre': 'La Pola parte alta', 'lat': 4.4380, 'lng': -75.2300},
+                {'nombre': 'Edén de la Pola', 'lat': 4.4390, 'lng': -75.2290},
+                {'nombre': 'Libertador', 'lat': 4.4400, 'lng': -75.2280},
+                {'nombre': 'Pueblo Nuevo', 'lat': 4.4410, 'lng': -75.2270},
+                {'nombre': 'San Pedro Alejandrino', 'lat': 4.4420, 'lng': -75.2260},
+                {'nombre': 'Brisas del Combeima', 'lat': 4.4430, 'lng': -75.2250},
+                {'nombre': 'Chapetón', 'lat': 4.4440, 'lng': -75.2240},
+                {'nombre': 'La Vega', 'lat': 4.4450, 'lng': -75.2230},
+                {'nombre': 'Calambeo', 'lat': 4.4520, 'lng': -75.2050},
+                {'nombre': '20 de Julio', 'lat': 4.4460, 'lng': -75.2220},
+                {'nombre': '7 de Agosto', 'lat': 4.4470, 'lng': -75.2210},
+                {'nombre': 'Alaska', 'lat': 4.4480, 'lng': -75.2200},
+                {'nombre': 'Ancón', 'lat': 4.4490, 'lng': -75.2190},
+                {'nombre': 'Belén', 'lat': 4.4410, 'lng': -75.2340},
+                {'nombre': 'Carmenza Rocha', 'lat': 4.4500, 'lng': -75.2180},
+                {'nombre': 'Avenida', 'lat': 4.4510, 'lng': -75.2170},
+                {'nombre': 'El Carmen', 'lat': 4.4520, 'lng': -75.2160},
+                {'nombre': 'Altos de Calambeo', 'lat': 4.4530, 'lng': -75.2150},
+                {'nombre': 'Boyacá', 'lat': 4.4540, 'lng': -75.2140},
+                {'nombre': 'Hipódromo', 'lat': 4.4320, 'lng': -75.2280},
+            ]
+        },
+        'zona_3_norte': {
+            'nombre': 'Zona 3 - Norte/Nororiente',
+            'color': '#dc3545',
+            'barrios': [
+                {'nombre': 'Antonio Nariño', 'lat': 4.4600, 'lng': -75.2180},
+                {'nombre': 'Belalcázar', 'lat': 4.4610, 'lng': -75.2170},
+                {'nombre': 'El Carmen', 'lat': 4.4620, 'lng': -75.2160},
+                {'nombre': 'Fenalco', 'lat': 4.4630, 'lng': -75.2150},
+                {'nombre': 'San Simón', 'lat': 4.4450, 'lng': -75.2180},
+                {'nombre': 'Ancón', 'lat': 4.4640, 'lng': -75.2140},
+                {'nombre': 'Ancón Parte Alta', 'lat': 4.4650, 'lng': -75.2130},
+                {'nombre': 'Entrerrios', 'lat': 4.4660, 'lng': -75.2120},
+                {'nombre': 'La Granja', 'lat': 4.4670, 'lng': -75.2110},
+                {'nombre': 'La Paz', 'lat': 4.4680, 'lng': -75.2100},
+                {'nombre': 'Palermo', 'lat': 4.4690, 'lng': -75.2090},
+                {'nombre': 'San Simón Parte Alta', 'lat': 4.4700, 'lng': -75.2080},
+                {'nombre': 'San Simón Parte Baja', 'lat': 4.4710, 'lng': -75.2070},
+                {'nombre': 'Piedrapintada', 'lat': 4.4720, 'lng': -75.2060},
+                {'nombre': 'Calarcá', 'lat': 4.4730, 'lng': -75.2050},
+                {'nombre': 'Gaitán', 'lat': 4.4740, 'lng': -75.2040},
+                {'nombre': 'Limonar', 'lat': 4.4750, 'lng': -75.2030},
+                {'nombre': 'San Carlos', 'lat': 4.4760, 'lng': -75.2020},
+                {'nombre': 'Asturias', 'lat': 4.4770, 'lng': -75.2010},
+                {'nombre': 'Altamira', 'lat': 4.4780, 'lng': -75.2000},
+                {'nombre': 'Centenario', 'lat': 4.4790, 'lng': -75.1990},
+                {'nombre': 'Claret', 'lat': 4.4800, 'lng': -75.1980},
+                {'nombre': 'Macarena', 'lat': 4.4810, 'lng': -75.1970},
+                {'nombre': 'Montecarlo', 'lat': 4.4820, 'lng': -75.1960},
+                {'nombre': 'Jordán 4ª Etapa', 'lat': 4.4550, 'lng': -75.2250},
+                {'nombre': 'Jordán 6ª Etapa', 'lat': 4.4560, 'lng': -75.2240},
+                {'nombre': 'Jordán 7ª Etapa', 'lat': 4.4570, 'lng': -75.2230},
+                {'nombre': 'Jordán 8ª Etapa', 'lat': 4.4580, 'lng': -75.2220},
+                {'nombre': 'Jordán 9ª Etapa', 'lat': 4.4590, 'lng': -75.2210},
+                {'nombre': 'Prados del Norte', 'lat': 4.4830, 'lng': -75.1950},
+                {'nombre': 'La Campiña', 'lat': 4.4840, 'lng': -75.1940},
+                {'nombre': 'Arkacentro', 'lat': 4.4850, 'lng': -75.1930},
+                {'nombre': 'Los Arrayanes', 'lat': 4.4860, 'lng': -75.1920},
+                {'nombre': 'Villa Mayorga', 'lat': 4.4870, 'lng': -75.1910},
+                {'nombre': 'El Vergel', 'lat': 4.4600, 'lng': -75.2180},
+                {'nombre': 'Colinas del Norte', 'lat': 4.4880, 'lng': -75.1900},
+                {'nombre': 'Protecho', 'lat': 4.4890, 'lng': -75.1890},
+                {'nombre': 'Protecho Salado', 'lat': 4.4900, 'lng': -75.1880},
+                {'nombre': 'El Salado Parte Alta', 'lat': 4.4850, 'lng': -75.1950},
+                {'nombre': 'El Salado Parte Baja', 'lat': 4.4860, 'lng': -75.1940},
+                {'nombre': 'La Misión', 'lat': 4.4910, 'lng': -75.1870},
+                {'nombre': 'Nuevo Horizonte', 'lat': 4.4920, 'lng': -75.1860},
+                {'nombre': 'Portal del Salado', 'lat': 4.4930, 'lng': -75.1850},
+                {'nombre': 'Torres del Vergel', 'lat': 4.4940, 'lng': -75.1840},
+                {'nombre': 'El Salado', 'lat': 4.4850, 'lng': -75.1950},
+                {'nombre': 'Villa del Norte', 'lat': 4.4950, 'lng': -75.1830},
+                {'nombre': 'San Lucas', 'lat': 4.4960, 'lng': -75.1820},
+                {'nombre': 'Oviedo', 'lat': 4.4970, 'lng': -75.1810},
+                {'nombre': 'Modelia', 'lat': 4.4980, 'lng': -75.1800},
+                {'nombre': 'Arkaniza', 'lat': 4.4990, 'lng': -75.1790},
+                {'nombre': 'Ciudadela Comfenalco', 'lat': 4.5000, 'lng': -75.1780},
+                {'nombre': 'El Topacio', 'lat': 4.4720, 'lng': -75.2100},
+                {'nombre': 'Garzones', 'lat': 4.5010, 'lng': -75.1770},
+                {'nombre': 'La Ceiba', 'lat': 4.5020, 'lng': -75.1760},
+                {'nombre': 'Miramar', 'lat': 4.5030, 'lng': -75.1750},
+                {'nombre': 'Palmeras', 'lat': 4.5040, 'lng': -75.1740},
+                {'nombre': 'San Francisco', 'lat': 4.5050, 'lng': -75.1730},
+                {'nombre': 'Santa Rita', 'lat': 4.4350, 'lng': -75.2350},
+                {'nombre': 'Ciudad Simón Bolívar', 'lat': 4.4820, 'lng': -75.2020},
+                {'nombre': 'El Jardín Santander', 'lat': 4.5060, 'lng': -75.1720},
+                {'nombre': 'Nueva Armero', 'lat': 4.5070, 'lng': -75.1710},
+                {'nombre': 'Comfenalco', 'lat': 4.5080, 'lng': -75.1700},
+                {'nombre': 'El Jardín', 'lat': 4.5090, 'lng': -75.1690},
+                {'nombre': 'La Cima', 'lat': 4.5100, 'lng': -75.1680},
+                {'nombre': 'Picaleña', 'lat': 4.4180, 'lng': -75.2420},
+                {'nombre': 'Villa Donia', 'lat': 4.5110, 'lng': -75.1670},
+                {'nombre': 'Villa Esperanza', 'lat': 4.5120, 'lng': -75.1660},
+                {'nombre': 'Villa Restrepo', 'lat': 4.4140, 'lng': -75.2350},
+            ]
+        }
+    }
+    
+    # Obtener zona del conductor si está asignada
+    zona_conductor = None
+    barrios_zona_conductor = []
+    barrios_zona_conductor_json = '[]'
+    barrios_nombres_zona = []
+    
+    if request.user.role == 'conductor' and request.user.zona_asignada:
+        zona_conductor = request.user.zona_asignada
+        if zona_conductor in barrios_por_zona:
+            barrios_zona_conductor = barrios_por_zona[zona_conductor]['barrios']
+            # Obtener solo los nombres de los barrios de la zona
+            barrios_nombres_zona = [b['nombre'] for b in barrios_zona_conductor]
+            # Convertir a JSON para usar en JavaScript
+            import json
+            barrios_zona_conductor_json = json.dumps(barrios_zona_conductor)
+    
+    # Filtrar rutas según el rol
+    if request.user.role == 'conductor' and zona_conductor:
+        # Los conductores ven todas las rutas ASIGNADAS A ELLOS (por conductor) o de su zona
+        # También ven rutas pendientes sin asignar para que puedan tomarlas
+        routes = Ruta.objects.filter(
+            Q(conductor=request.user) | 
+            Q(zona_asignada=zona_conductor) |
+            Q(conductor__isnull=True, zona_asignada__isnull=True, estado='pendiente')
         ).order_by('-fecha_creacion')
     else:
-        # Para admin/superuser: mostrar todas las rutas (pueden ser ambos modelos)
-        # Priorizar RutaRecoleccion pero incluir Ruta como fallback
-        try:
-            routes = RutaRecoleccion.objects.all().order_by('-fecha_creacion')
-            if not routes.exists():
-                routes = Ruta.objects.all().order_by('-fecha_creacion')
-        except:
-            routes = Ruta.objects.all().order_by('-fecha_creacion')
+        # Admins y superusers ven todas las rutas
+        routes = Ruta.objects.all().order_by('-fecha_creacion')
     
     context = {
         'show_integrated_view': True,
         'routes': routes,
-        'is_conductor': request.user.role == 'conductor',  # Para mostrar/ocultar opciones en el template
+        'is_conductor': request.user.role == 'conductor',
+        'barrios_por_zona': barrios_por_zona,
+        'zona_conductor': zona_conductor,
+        'barrios_zona_conductor': barrios_zona_conductor,
+        'barrios_zona_conductor_json': barrios_zona_conductor_json,
+        'info_zona': barrios_por_zona.get(zona_conductor, {}) if zona_conductor else {},
+        'barrios_nombres_zona': barrios_nombres_zona,
     }
 
     return render(request, 'core/rutas.html', context)
@@ -2897,7 +2992,9 @@ def edit_ruta(request, ruta_id):
                         usuario=usuario,
                         titulo="Recolección Reagendada",
                         mensaje=f"Tu recolección ha sido reagendada para el {fecha_formateada} a las {hora_formateada}.",
-                        tipo='sistema'
+                        motivo=ruta.notas_admin if ruta.notas_admin else None,
+                        tipo='sistema',
+                        leida=False
                     )
                     
                 except Exception as e:
@@ -2937,6 +3034,74 @@ def confirmar_ruta(request, ruta_id):
             ruta = get_object_or_404(Ruta, id=ruta_id)
             ruta.estado = 'confirmada'
             ruta.fecha_procesamiento = timezone.now()
+            
+            # ASIGNAR CONDUCTOR Y ZONA AUTOMÁTICAMENTE SEGÚN EL BARRIO
+            barrios_por_zona = {
+                'zona_1_sur': [
+                    'Ricaurte Parte Alta', 'Ricaurte Parte Baja', 'Urb albania 2', 'Miramar', 'San Isidro', 
+                    'Colinas del Sur', 'Villa Marina', 'Villa Claudia', 'Villa Ilusión', 'La Unión', 
+                    'Brisas del Sur', 'Villa Teresa', 'Balcones del Sur', 'San Antonio', 'San Jorge', 
+                    'Boquerón', 'Jazmín', 'El Tejar', 'La Florida', 'Granada', 'El Refugio', 
+                    'Praderas de San Mateo'
+                ],
+                'zona_2_centro': [
+                    'La Libertad', 'Augusto E. Medina', 'Baltazar', 'Centro', 'Combeima', 'Estación', 
+                    'Interlaken', 'La Pola', 'La Pola parte alta', 'Edén de la Pola', 'Libertador', 
+                    'Pueblo Nuevo', 'San Pedro Alejandrino', 'Brisas del Combeima', 'Chapetón', 'La Vega', 
+                    'Calambeo', '20 de Julio', '7 de Agosto', 'Alaska', 'Ancón', 'Belén', 
+                    'Carmenza Rocha', 'Avenida', 'El Carmen', 'Altos de Calambeo', 'Boyacá', 'Hipódromo'
+                ],
+                'zona_3_norte': [
+                    'Antonio Nariño', 'Belalcázar', 'El Carmen', 'Fenalco', 'San Simón', 'Ancón', 
+                    'Ancón Parte Alta', 'Entrerrios', 'La Granja', 'La Paz', 'Palermo', 'San Simón Parte Alta', 
+                    'San Simón Parte Baja', 'Piedrapintada', 'Calarcá', 'Gaitán', 'Limonar', 'San Carlos', 
+                    'Asturias', 'Altamira', 'Centenario', 'Claret', 'Macarena', 'Montecarlo', 'Jordán 4ª Etapa', 
+                    'Jordán 6ª Etapa', 'Jordán 7ª Etapa', 'Jordán 8ª Etapa', 'Jordán 9ª Etapa', 'Prados del Norte', 
+                    'La Campiña', 'Arkacentro', 'Los Arrayanes', 'Villa Mayorga', 'El Vergel', 'Colinas del Norte', 
+                    'Protecho', 'Protecho Salado', 'El Salado Parte Alta', 'El Salado Parte Baja', 'La Misión', 
+                    'Nuevo Horizonte', 'Portal del Salado', 'Torres del Vergel', 'El Salado', 'Villa del Norte', 
+                    'San Lucas', 'Oviedo', 'Modelia', 'Arkaniza', 'Ciudadela Comfenalco', 'El Topacio', 
+                    'Garzones', 'La Ceiba', 'Miramar', 'Palmeras', 'San Francisco', 'Santa Rita', 
+                    'Ciudad Simón Bolívar', 'El Jardín Santander', 'Nueva Armero', 'Comfenalco', 'El Jardín', 
+                    'La Cima', 'Picaleña', 'Villa Donia', 'Villa Esperanza', 'Villa Restrepo'
+                ]
+            }
+            
+            # Detectar zona según el barrio
+            zona_detectada = None
+            barrio_ruta = ruta.barrio.strip()
+            
+            for zona, barrios in barrios_por_zona.items():
+                # Búsqueda flexible: ignorar mayúsculas y buscar coincidencias parciales
+                for barrio_zona in barrios:
+                    if barrio_zona.lower() in barrio_ruta.lower() or barrio_ruta.lower() in barrio_zona.lower():
+                        zona_detectada = zona
+                        break
+                if zona_detectada:
+                    break
+            
+            # Si no se detecta zona, asignar zona_1_sur por defecto (para barrios no registrados)
+            if not zona_detectada:
+                zona_detectada = 'zona_1_sur'
+                print(f"⚠️ Barrio '{barrio_ruta}' no encontrado en listas, asignando zona_1_sur por defecto")
+            
+            # Asignar zona a la ruta
+            ruta.zona_asignada = zona_detectada
+            
+            # Buscar conductor asignado a esa zona
+            from core.models import Usuario
+            conductor = Usuario.objects.filter(
+                role='conductor',
+                zona_asignada=zona_detectada,
+                is_active=True
+            ).first()
+            
+            if conductor:
+                ruta.conductor = conductor
+                print(f"✅ Ruta {ruta_id} asignada a conductor {conductor.username} de {zona_detectada}")
+            else:
+                print(f"⚠️ No hay conductor disponible para {zona_detectada}")
+            
             ruta.save()
             
             # Enviar correo de confirmación al usuario
@@ -3098,50 +3263,6 @@ def confirmar_ruta(request, ruta_id):
             return JsonResponse({'success': False, 'message': f'Error al confirmar la ruta: {str(e)}'})
     return JsonResponse({'success': False, 'message': 'Método no permitido.'})
 
-@login_required
-def cancelar_ruta(request, ruta_id):
-    """Permite a un usuario cancelar su propia ruta programada"""
-    if request.method == 'POST':
-        try:
-            ruta = get_object_or_404(Ruta, id=ruta_id, usuario=request.user)
-            
-            # Verificar que la ruta no esté ya en proceso o completada
-            if ruta.estado in ['en_proceso', 'completada']:
-                return JsonResponse({
-                    'success': False, 
-                    'message': 'No puedes cancelar una ruta que ya está en proceso o completada.'
-                })
-            
-            motivo = request.POST.get('motivo', 'Cancelada por el usuario')
-            ruta.estado = 'cancelada'
-            ruta.fecha_procesamiento = timezone.now()
-            ruta.notas_admin = f"Cancelada por usuario: {motivo}"
-            ruta.save()
-            
-            # Crear notificación para el usuario
-            Notificacion.objects.create(
-                usuario=request.user,
-                titulo='Recolección Cancelada',
-                mensaje=f'Has cancelado tu recolección programada para el {ruta.fecha}.',
-                tipo='warning'
-            )
-            
-            return JsonResponse({
-                'success': True, 
-                'message': 'Recolección cancelada exitosamente.'
-            })
-        except Ruta.DoesNotExist:
-            return JsonResponse({
-                'success': False, 
-                'message': 'No se encontró la ruta o no tienes permiso para cancelarla.'
-            })
-        except Exception as e:
-            return JsonResponse({
-                'success': False, 
-                'message': f'Error al cancelar la ruta: {str(e)}'
-            })
-    return JsonResponse({'success': False, 'message': 'Método no permitido.'})
-
 @ajax_required_admin
 def rechazar_ruta(request, ruta_id):
     if request.method == 'POST':
@@ -3171,6 +3292,7 @@ def reagendar_ruta(request, ruta_id):
             notas = request.POST.get('notas_admin', '')
             if notas:
                 ruta.notas_admin = notas
+                ruta.motivo_reagendamiento = notas  # Guardar motivo en la ruta
             ruta.save()
             
             # Enviar correo de reagendamiento
@@ -3296,7 +3418,8 @@ def reagendar_ruta(request, ruta_id):
                 Notificacion.objects.create(
                     usuario=usuario,
                     titulo="Recolección Reagendada",
-                    mensaje=f"Tu recolección ha sido reagendada para el {fecha_formateada} a las {hora_formateada}. {f'Motivo: {notas}' if notas else ''}",
+                    mensaje=f"Tu recolección ha sido reagendada para el {fecha_formateada} a las {hora_formateada}.",
+                    motivo=notas if notas else None,  # Campo separado para el motivo
                     tipo='sistema',
                     leida=False  # Importante: debe estar como no leída para que aparezca el modal
                 )
@@ -4360,39 +4483,29 @@ def rutasusuario(request):
             'direccion': user.direccion if hasattr(user, 'direccion') and user.direccion else '',
         }
         
-        # Obtener canjes del usuario que requieren recolección
+        # Obtener todas las rutas activas del usuario (no completadas ni rechazadas)
+        rutas_activas = Ruta.objects.filter(
+            usuario=request.user,
+            estado__in=['pendiente', 'confirmada', 'reagendada']
+        ).order_by('-fecha_creacion')
+        
+        # Obtener canjes del usuario que YA tienen recolección programada
         canjes_con_recoleccion = Canje.objects.filter(
             usuario=request.user, 
-            necesita_recoleccion=True
+            necesita_recoleccion=True  # Ya tienen ruta programada
         ).select_related('material').order_by('-fecha_solicitud')
         
-        # Obtener canjes aprobados disponibles para incluir en solicitud de ruta
-        # Estos son canjes que el usuario puede incluir en su solicitud de recolección
+        # Obtener canjes PENDIENTES disponibles para programar recolección (aparecen en Tab 2)
         canjes_pendientes = Canje.objects.filter(
             usuario=request.user,
-            estado='pendiente',  # Canjes pendientes
-            necesita_recoleccion=False  # Que aún no estén programados para recolección
+            estado='pendiente',
+            necesita_recoleccion=False  # Aún no tienen ruta programada
         ).select_related('material').order_by('-fecha_solicitud')
         
         # Preparar datos de canjes con información de ruta (basado en modelo Ruta)
         for canje in canjes_con_recoleccion:
-            # Buscar ruta asociada al usuario (modelo Ruta, no RutaRecoleccion)
-            ruta_info = None
-            try:
-                # Buscar la ruta más reciente del usuario que contenga el material del canje
-                ruta_info = Ruta.objects.filter(
-                    usuario=request.user,
-                    materiales__icontains=canje.material.nombre
-                ).order_by('-fecha_creacion').first()
-                
-                # Si no encuentra por material, buscar la ruta más reciente
-                if not ruta_info:
-                    ruta_info = Ruta.objects.filter(
-                        usuario=request.user
-                    ).order_by('-fecha_creacion').first()
-                    
-            except Exception as e:
-                print(f"Error buscando ruta para canje {canje.id}: {e}")
+            # Buscar la ruta más reciente activa del usuario
+            ruta_info = rutas_activas.first() if rutas_activas.exists() else None
             
             # Crear objeto compatible con RutaRecoleccion para la plantilla
             if ruta_info:
@@ -4412,20 +4525,30 @@ def rutasusuario(request):
             ).order_by('-fecha')[:10]  # Últimas 10 rutas
             
             for ruta in rutas_completadas:
-                # Simular datos de historial (puedes ajustar según tu modelo)
+                # Pasar datos completos de la ruta al historial
                 historial_rutas.append({
+                    'id': ruta.id,
                     'nombre': f"Ruta {ruta.id}",
-                    'fecha_completada': ruta.fecha if hasattr(ruta, 'fecha') else ruta.created_at if hasattr(ruta, 'created_at') else None,
+                    'fecha': ruta.fecha.strftime('%d/%m/%Y') if ruta.fecha else 'N/A',
+                    'hora': ruta.hora.strftime('%H:%M') if ruta.hora else 'N/A',
+                    'fecha_completada': ruta.fecha if hasattr(ruta, 'fecha') else ruta.fecha_creacion if hasattr(ruta, 'fecha_creacion') else None,
+                    'barrio': ruta.barrio or 'N/A',
+                    'direccion': ruta.direccion or 'N/A',
+                    'referencia': ruta.referencia or 'Sin referencia',
                     'materiales_recolectados': ruta.materiales or "Material mixto",
                     'peso_total': "Estimado según materiales",
-                    'puntos_otorgados': "Calculados automáticamente"
+                    'puntos_otorgados': "Calculados automáticamente",
+                    'estado': ruta.get_estado_display() if hasattr(ruta, 'get_estado_display') else ruta.estado,
+                    'notas_admin': ruta.notas_admin or '',
+                    'motivo_reagendamiento': ruta.motivo_reagendamiento if hasattr(ruta, 'motivo_reagendamiento') and ruta.motivo_reagendamiento else None,
+                    'fecha_creacion': ruta.fecha_creacion.strftime('%d/%m/%Y %H:%M') if ruta.fecha_creacion else 'N/A'
                 })
         except Exception as e:
             print(f"Error obteniendo historial: {e}")
     
     context = {
         'user_canjes_recoleccion': user_canjes_recoleccion,
-        'canjes_pendientes': canjes_pendientes,  # Canjes aprobados listos para recolección
+        'canjes_pendientes': canjes_pendientes,  # Para mostrar en Tab 2
         'historial_rutas': historial_rutas,
         'user_data': user_data,  # Datos del usuario para auto-completar
     }
@@ -4459,6 +4582,138 @@ def rutasusuario_reagendada(request, ruta_id):
     except Exception as e:
         print(f"Error en rutasusuario_reagendada: {str(e)}")
         return redirect('rutasusuario')
+
+@login_required
+@require_POST
+def cancelar_ruta(request, ruta_id):
+    """Cancelar una ruta reagendada"""
+    try:
+        ruta = get_object_or_404(Ruta, id=ruta_id, usuario=request.user)
+        
+        # Solo permitir cancelar rutas reagendadas o pendientes
+        if ruta.estado not in ['reagendada', 'pendiente']:
+            return JsonResponse({
+                'success': False,
+                'error': 'No se puede cancelar esta ruta'
+            }, status=400)
+        
+        # Cambiar estado a cancelada
+        ruta.estado = 'cancelada'
+        ruta.save()
+        
+        # Crear notificación para el usuario
+        Notificacion.objects.create(
+            usuario=request.user,
+            tipo='ruta',
+            titulo='Ruta Cancelada',
+            mensaje=f'Has cancelado la ruta {ruta.nombre}',
+            icono='fa-times-circle',
+            color='danger'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Ruta cancelada exitosamente'
+        })
+        
+    except Ruta.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Ruta no encontrada'
+        }, status=404)
+    except Exception as e:
+        print(f"Error cancelando ruta: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Error al cancelar la ruta'
+        }, status=500)
+
+@login_required
+@require_http_methods(["POST"])
+def reagendar_ruta(request, ruta_id):
+    """Reagendar una ruta con nueva fecha y hora"""
+    try:
+        ruta = get_object_or_404(Ruta, id=ruta_id, usuario=request.user)
+        
+        # Solo permitir reagendar rutas reagendadas o pendientes
+        if ruta.estado not in ['reagendada', 'pendiente']:
+            return JsonResponse({
+                'success': False,
+                'error': 'No se puede reagendar esta ruta'
+            }, status=400)
+        
+        # Obtener datos del request
+        data = json.loads(request.body)
+        nueva_fecha = data.get('fecha')
+        nueva_hora = data.get('hora')
+        notas = data.get('notas', '')
+        
+        if not nueva_fecha or not nueva_hora:
+            return JsonResponse({
+                'success': False,
+                'error': 'Fecha y hora son obligatorias'
+            }, status=400)
+        
+        # Convertir a datetime
+        from datetime import datetime, time
+        fecha_obj = datetime.strptime(nueva_fecha, '%Y-%m-%d').date()
+        hora_obj = datetime.strptime(nueva_hora, '%H:%M').time()
+        
+        # Validar que sea fecha futura
+        fecha_hora_completa = datetime.combine(fecha_obj, hora_obj)
+        if fecha_hora_completa <= datetime.now():
+            return JsonResponse({
+                'success': False,
+                'error': 'La fecha y hora deben ser futuras'
+            }, status=400)
+        
+        # Actualizar la ruta
+        ruta.fecha = fecha_obj
+        ruta.hora = hora_obj
+        ruta.estado = 'pendiente'  # Volver a estado pendiente
+        ruta.motivo_reagendamiento = ''  # Limpiar el motivo anterior
+        if notas:
+            ruta.notas = notas
+        ruta.save()
+        
+        # Notificar al usuario
+        Notificacion.objects.create(
+            usuario=request.user,
+            tipo='ruta',
+            titulo='Ruta Reagendada',
+            mensaje=f'Tu ruta de recolección en {ruta.barrio} ha sido reagendada para el {fecha_obj.strftime("%d/%m/%Y")} a las {hora_obj.strftime("%H:%M")}',
+            icono='fa-calendar-check',
+            color='success'
+        )
+        
+        # Notificar a todos los conductores del sistema
+        conductores = Usuario.objects.filter(role='conductor', is_active=True)
+        for conductor in conductores:
+            Notificacion.objects.create(
+                usuario=conductor,
+                tipo='ruta',
+                titulo='Ruta Reagendada por Usuario',
+                mensaje=f'El usuario {request.user.get_full_name()} ha reagendado una ruta de recolección en {ruta.barrio} para el {fecha_obj.strftime("%d/%m/%Y")} a las {hora_obj.strftime("%H:%M")}',
+                icono='fa-calendar-alt',
+                color='warning'
+            )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Ruta reagendada exitosamente'
+        })
+        
+    except Ruta.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Ruta no encontrada'
+        }, status=404)
+    except Exception as e:
+        print(f"Error reagendando ruta: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al reagendar la ruta: {str(e)}'
+        }, status=500)
 
 @login_required
 @csrf_exempt
@@ -4495,27 +4750,6 @@ def agendar_ruta_usuario(request):
                 elif mat.get('peso', 0) > 0:
                     # Es material manual (si aún existe esta opción)
                     materiales_str += f"{mat['tipo'].capitalize()}: {mat['peso']}kg, "
-
-            # Compatibilidad: también aceptar selección directa de checkboxes 'canjes[]'
-            # del formulario (sin JSON 'materiales_seleccionados')
-            canjes_ids_form = request.POST.getlist('canjes[]')
-            if canjes_ids_form:
-                # Unificar IDs evitando duplicados
-                existing = set(str(cid) for cid in canjes_ids)
-                for cid in canjes_ids_form:
-                    if str(cid) not in existing:
-                        canjes_ids.append(cid)
-                # Si no se construyó materiales_str desde JSON, construirlo desde BD
-                if not materiales_str:
-                    try:
-                        seleccionados = Canje.objects.filter(
-                            id__in=canjes_ids_form,
-                            usuario=request.user
-                        ).select_related('material')
-                        for c in seleccionados:
-                            materiales_str += f"{c.material.nombre}: {c.peso}kg ({c.puntos} puntos), "
-                    except Exception as e:
-                        print(f"Error construyendo materiales_str desde canjes[]: {e}")
             
             # Limpiar la coma final
             materiales_str = materiales_str.rstrip(', ')
@@ -4527,6 +4761,10 @@ def agendar_ruta_usuario(request):
                     usuario=request.user
                 ).update(necesita_recoleccion=True)
             
+            # Determinar la zona basada en la dirección o usar una zona por defecto
+            # Por ahora asignamos a zona_1_sur como predeterminado, pero podrías mejorarlo
+            zona_asignada = 'zona_1_sur'  # Zona por defecto
+            
             # Crear la ruta con los nuevos datos
             nueva_ruta = Ruta.objects.create(
                 usuario=request.user,
@@ -4535,17 +4773,23 @@ def agendar_ruta_usuario(request):
                 direccion=direccion,
                 materiales=materiales_str,
                 referencia=notas_adicionales,
+                zona_asignada=zona_asignada,  # Asignar zona automáticamente
                 # Campos adicionales para el nuevo formulario
                 barrio=nombre_completo,  # Reutilizamos este campo para nombre completo
             )
             
             # Crear entrada en RutaRecoleccion si existe el modelo
             try:
+                from datetime import datetime, timedelta
+                hora_obj = datetime.strptime(hora_preferida, '%H:%M')
+                hora_fin = (hora_obj + timedelta(hours=2)).time()
+                
                 ruta_recoleccion = RutaRecoleccion.objects.create(
-                    nombre=f"Recolección Usuario {request.user.id} - {nueva_ruta.id}",
-                    descripcion=f"Recolección domiciliaria para {nombre_completo}",
-                    fecha_programada=f"{fecha_preferida} {hora_preferida}:00",
-                    direccion_inicio=direccion,
+                    nombre=f"Recolección {nombre_completo}",
+                    fecha_programada=fecha_preferida,
+                    hora_inicio=hora_preferida,
+                    hora_fin_estimada=hora_fin,
+                    zona=zona,
                     estado='planificada'
                 )
                 
@@ -4561,17 +4805,36 @@ def agendar_ruta_usuario(request):
             except Exception as e:
                 print(f"Error creando RutaRecoleccion: {e}")
             
-            # Añadir mensaje de éxito y redireccionar
-            from django.contrib import messages
+            # Crear notificación para el usuario
+            Notificacion.objects.create(
+                usuario=request.user,
+                tipo='ruta',
+                titulo='Solicitud Enviada',
+                mensaje=f'Tu solicitud de recolección para el {fecha_preferida} ha sido enviada exitosamente',
+                icono='fa-check-circle',
+                color='success'
+            )
+            
+            # Notificar a todos los conductores
+            conductores = Usuario.objects.filter(role='conductor', is_active=True)
+            for conductor in conductores:
+                Notificacion.objects.create(
+                    usuario=conductor,
+                    tipo='ruta',
+                    titulo='Nueva Solicitud de Recolección',
+                    mensaje=f'{request.user.get_full_name()} ha solicitado recolección en {direccion} para el {fecha_preferida}',
+                    icono='fa-calendar-plus',
+                    color='info'
+                )
+            
             messages.success(request, '¡Tu solicitud de recolección ha sido enviada exitosamente! Te contactaremos pronto.')
             return redirect('rutasusuario')
+            
         except Exception as e:
             print(f"Error en agendar_ruta_usuario: {e}")
-            from django.contrib import messages
             messages.error(request, 'Error al procesar la solicitud. Por favor inténtalo de nuevo.')
             return redirect('rutasusuario')
     
-    from django.contrib import messages
     messages.error(request, 'Método no permitido.')
     return redirect('rutasusuario')
 
@@ -5545,16 +5808,23 @@ def marcar_reagendamiento_visto(request):
     return JsonResponse({'success': False, 'message': 'Método no permitido'})
 
 @login_required
+@login_required
 def get_notifications(request):
     """Vista para obtener notificaciones del usuario desde el modelo Notificacion"""
     try:
         from .models import Notificacion
         from django.utils import timezone
         
-        # Obtener solo las notificaciones del modelo Notificacion
-        notificaciones = Notificacion.objects.filter(
-            usuario=request.user
-        ).order_by('-fecha_creacion')[:20]  # Últimas 20 notificaciones
+        # Permitir filtrar solo no leídas con parámetro ?unread_only=true
+        unread_only = request.GET.get('unread_only', 'false').lower() == 'true'
+        
+        # Obtener notificaciones del usuario
+        notificaciones_query = Notificacion.objects.filter(usuario=request.user)
+        
+        if unread_only:
+            notificaciones_query = notificaciones_query.filter(leida=False)
+        
+        notificaciones = notificaciones_query.order_by('-fecha_creacion')[:20]
         
         notifications = []
         unread_count = 0
@@ -5574,11 +5844,14 @@ def get_notifications(request):
             notifications.append({
                 'id': notif.id,
                 'tipo': notif_tipo,
+                'tipo_original': notif.tipo,
                 'titulo': notif.titulo,
                 'mensaje': notif.mensaje,
+                'motivo': notif.motivo,
+                'created_at': notif.fecha_creacion.isoformat(),
                 'fecha_creacion': notif.fecha_creacion.isoformat(),
                 'leida': notif.leida,
-                'unread': not notif.leida,
+                'leido': notif.leida,
                 'data': {
                     'notificacion_id': notif.id,
                     'tipo': notif.tipo
@@ -5600,73 +5873,6 @@ def get_notifications(request):
             'error': str(e),
             'notifications': [],
             'unread_count': 0
-        })
-
-@login_required
-def get_latest_unread_notification(request):
-    """Vista para obtener la última notificación no leída del usuario"""
-    try:
-        from .models import Notificacion
-        
-        # Obtener la última notificación no leída de tipo importante
-        # Solo mostrar notificaciones de canjes, redenciones y reagendamientos
-        tipos_importantes = [
-            'canje_aprobado', 'canje_rechazado', 'canje_pendiente',
-            'redencion_aprobada', 'redencion_rechazada', 'redencion_pendiente',
-            'recompensa_canjeada', 'retiro_enviado',
-            'ruta_reagendada', 'ruta_confirmada', 'ruta_rechazada'
-        ]
-        
-        notificacion = Notificacion.objects.filter(
-            usuario=request.user,
-            leida=False,
-            tipo__in=tipos_importantes
-        ).order_by('-fecha_creacion').first()
-        
-        if notificacion:
-            # Determinar el tipo basado en el tipo de notificación
-            notif_tipo = 'general'
-            if notificacion.tipo in ['recompensa_canjeada', 'retiro_enviado', 'redencion_aprobada', 'redencion_pendiente', 'redencion_rechazada']:
-                notif_tipo = 'redencion'
-            elif notificacion.tipo in ['perfil_actualizado', 'foto_actualizada']:
-                notif_tipo = 'perfil'
-            elif notificacion.tipo in ['canje_aprobado', 'canje_pendiente', 'canje_rechazado']:
-                notif_tipo = 'canje'
-            elif notificacion.tipo in ['ruta_reagendada', 'ruta_confirmada', 'ruta_rechazada']:
-                notif_tipo = 'ruta'
-            
-            return JsonResponse({
-                'success': True,
-                'has_notification': True,
-                'notification': {
-                    'id': notificacion.id,
-                    'tipo': notif_tipo,
-                    'tipo_original': notificacion.tipo,  # Para el ícono correcto
-                    'titulo': notificacion.titulo,
-                    'mensaje': notificacion.mensaje,
-                    'motivo': notificacion.motivo or '',  # Incluir motivo si existe
-                    'fecha_creacion': notificacion.fecha_creacion.isoformat(),
-                    'leida': notificacion.leida,
-                    'unread': True,
-                    'data': {
-                        'notificacion_id': notificacion.id,
-                        'tipo': notificacion.tipo
-                    }
-                }
-            })
-        else:
-            return JsonResponse({
-                'success': True,
-                'has_notification': False,
-                'notification': None
-            })
-        
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'has_notification': False,
-            'error': str(e),
-            'notification': None
         })
 
 @login_required
@@ -5717,6 +5923,58 @@ def delete_all_notifications(request):
             })
     
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+@login_required
+def get_latest_unread_notification(request):
+    """Vista para obtener la notificación no leída más reciente del usuario"""
+    try:
+        from .models import Notificacion
+        
+        # Obtener la notificación no leída más reciente
+        notificacion = Notificacion.objects.filter(
+            usuario=request.user,
+            leida=False
+        ).order_by('-fecha_creacion').first()
+        
+        if notificacion:
+            # Determinar el tipo para el frontend
+            notif_tipo = 'general'
+            if notificacion.tipo in ['recompensa_canjeada', 'retiro_enviado', 'redencion_aprobada', 'redencion_pendiente', 'redencion_rechazada']:
+                notif_tipo = 'redencion'
+            elif notificacion.tipo in ['perfil_actualizado', 'foto_actualizada']:
+                notif_tipo = 'perfil'
+            elif notificacion.tipo in ['canje_aprobado', 'canje_pendiente', 'canje_rechazado']:
+                notif_tipo = 'canje'
+            elif notificacion.tipo in ['password_cambiado', 'sistema']:
+                notif_tipo = 'general'
+            
+            return JsonResponse({
+                'success': True,
+                'has_notification': True,
+                'notification': {
+                    'id': notificacion.id,
+                    'tipo': notif_tipo,
+                    'tipo_original': notificacion.tipo,
+                    'titulo': notificacion.titulo,
+                    'mensaje': notificacion.mensaje,
+                    'motivo': notificacion.motivo,
+                    'created_at': notificacion.fecha_creacion.isoformat(),
+                    'leida': False
+                }
+            })
+        else:
+            return JsonResponse({
+                'success': True,
+                'has_notification': False,
+                'notification': None
+            })
+            
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'has_notification': False
+        })
 
 @login_required
 def mark_notification_read(request):
@@ -6076,21 +6334,9 @@ def actualizar_estado_seguimiento(request, seguimiento_id):
     if request.method == 'POST':
         try:
             seguimiento = get_object_or_404(SeguimientoRecompensa, id=seguimiento_id)
-            
-            # Soportar tanto JSON (fetch) como POST tradicional
-            import json
-            if request.content_type and 'application/json' in request.content_type:
-                try:
-                    data = json.loads(request.body.decode('utf-8'))
-                except Exception:
-                    data = {}
-                nuevo_estado = data.get('estado') or data.get('nuevo_estado')
-                comentario = data.get('comentario', '')
-                ubicacion = data.get('ubicacion', '')
-            else:
-                nuevo_estado = request.POST.get('estado') or request.POST.get('nuevo_estado')
-                comentario = request.POST.get('comentario', '')
-                ubicacion = request.POST.get('ubicacion', '')
+            nuevo_estado = request.POST.get('nuevo_estado')
+            comentario = request.POST.get('comentario', '')
+            ubicacion = request.POST.get('ubicacion', '')
             
             # Validar que el nuevo estado sea válido
             estados_validos = [estado[0] for estado in SeguimientoRecompensa.ESTADOS_SEGUIMIENTO]
@@ -6285,9 +6531,7 @@ def detalle_seguimiento(request, codigo_seguimiento):
             'seguimiento': {
                 'codigo': seguimiento.codigo_seguimiento,
                 'recompensa': seguimiento.recompensa.nombre,
-                'usuario': seguimiento.usuario.get_full_name() or seguimiento.usuario.username,
-                'estado': seguimiento.estado,  # Código del estado para getEstadoColor
-                'estado_display': seguimiento.get_estado_display(),  # Texto legible
+                'estado': seguimiento.get_estado_display(),
                 'estado_color': seguimiento.estado_color,
                 'porcentaje': seguimiento.porcentaje_progreso,
                 'fecha_solicitud': seguimiento.fecha_solicitud.strftime('%d/%m/%Y %H:%M'),
