@@ -367,12 +367,21 @@
                     <div class="col-md-6">
                         <div class="card" style="background: rgba(255,255,255,0.2); border: none; backdrop-filter: blur(10px);">
                             <div class="card-body">
-                                <h6 class="text-white mb-3"><i class="fas fa-list me-2"></i>Barrios de tu zona:</h6>
+                                <h6 class="text-white mb-3">
+                                    <i class="fas fa-list me-2"></i>Barrios de tu zona:
+                                    {% if 'zona_1' in zona_conductor %}
+                                        <span class="badge" style="background-color: {{ info_zona.color }};">Zona 1 - Sur</span>
+                                    {% elif 'zona_2' in zona_conductor %}
+                                        <span class="badge" style="background-color: {{ info_zona.color }};">Zona 2 - Centro</span>
+                                    {% elif 'zona_3' in zona_conductor %}
+                                        <span class="badge" style="background-color: {{ info_zona.color }};">Zona 3 - Norte</span>
+                                    {% endif %}
+                                </h6>
                                 <div class="row">
                                     {% for barrio in barrios_zona_conductor %}
                                     <div class="col-6 mb-2">
-                                        <span class="badge bg-light text-dark" style="width: 100%; text-align: left;">
-                                            <i class="fas fa-map-pin me-1" style="color: {{ info_zona.color }};"></i>{{ barrio.nombre }}
+                                        <span class="badge bg-light text-dark" style="width: 100%; text-align: left; padding: 8px 12px; font-size: 0.9rem;">
+                                            <i class="fas fa-map-marker-alt me-2" style="color: {{ info_zona.color }};"></i>{{ barrio.nombre }}
                                         </span>
                                     </div>
                                     {% endfor %}
