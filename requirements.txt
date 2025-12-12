@@ -43,7 +43,7 @@ daphne==4.0.0
 django-extensions==3.2.3
 
 # Email via API (Brevo/Sendinblue)
-django-anymail==10.4
+django-anymail==13.1
 
 # Testing
 pytest==7.4.4
