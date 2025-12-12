@@ -2684,7 +2684,20 @@ def rutas(request):
         messages.error(request, 'No tienes permisos para acceder a esta página.')
         return redirect('inicioadmin')
     
-    routes = Ruta.objects.all().order_by('-fecha_creacion')
+    # Filtrar rutas según el rol del usuario
+    if request.user.role == 'conductor':
+        # Para conductores: solo mostrar rutas de recolección asignadas a él
+        routes = RutaRecoleccion.objects.filter(conductor=request.user).order_by('-fecha_creacion')
+    else:
+        # Para admin/superuser: mostrar todas las rutas (pueden ser ambos modelos)
+        # Priorizar RutaRecoleccion pero incluir Ruta como fallback
+        try:
+            routes = RutaRecoleccion.objects.all().order_by('-fecha_creacion')
+            if not routes.exists():
+                routes = Ruta.objects.all().order_by('-fecha_creacion')
+        except:
+            routes = Ruta.objects.all().order_by('-fecha_creacion')
+    
     context = {
         'show_integrated_view': True,
         'routes': routes,
