@@ -1,0 +1,512 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignar Ruta a Conductor - EcoPuntos</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    
+    <!-- Font Awesome -->
+    <link href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary-color: #2ecc71;
+            --secondary-color: #27ae60;
+            --info-color: #3498db;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px;
+            margin: 0;
+            border: none;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .modal-header .conductor-info {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .map-container {
+            background: var(--light-color);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #mapa-ibague {
+            height: 400px;
+            width: 100%;
+            border-radius: 15px;
+        }
+
+        .ruta-selector {
+            margin-top: 25px;
+        }
+
+        .ruta-selector label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 12px;
+            display: block;
+            font-size: 16px;
+        }
+
+        .ruta-selector select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--light-color);
+            border-radius: 10px;
+            font-size: 15px;
+            color: var(--dark-color);
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .ruta-selector select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+        }
+
+        .ruta-selector select:hover {
+            border-color: var(--primary-color);
+        }
+
+        .rutas-info {
+            background: var(--light-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid var(--info-color);
+        }
+
+        .rutas-info h4 {
+            color: var(--info-color);
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .ruta-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .ruta-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .ruta-item strong {
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .ruta-item small {
+            color: #7f8c8d;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid var(--light-color);
+            background: #f8f9fa;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-custom {
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-cancelar {
+            background: #bdc3c7;
+            color: white;
+        }
+
+        .btn-cancelar:hover {
+            background: #95a5a6;
+            transform: translateY(-2px);
+        }
+
+        .btn-guardar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .btn-guardar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-guardar:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-card {
+            background: #e8f8f5;
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .info-card strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .info-card p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-container {
+                border-radius: 15px;
+                max-width: 100%;
+            }
+
+            .modal-header h2 {
+                font-size: 22px;
+            }
+
+            #mapa-ibague {
+                height: 300px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-custom {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-container">
+        <!-- Header -->
+        <div class="modal-header">
+            <div>
+                <h2><i class="fas fa-route"></i> Asignar Ruta a Conductor</h2>
+                <div class="conductor-info">
+                    👤 Conductor: <strong>{{ conductor.first_name }} {{ conductor.last_name }}</strong> 
+                    ({{ conductor.username }})
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body">
+            <!-- Info Card -->
+            <div class="info-card">
+                <strong><i class="fas fa-info-circle"></i> Mapa de Ibagué</strong>
+                <p>Selecciona una zona en el mapa o elige una ruta del dropdown para asignarla al conductor.</p>
+            </div>
+
+            <!-- Mapa -->
+            <div class="map-container">
+                <div id="mapa-ibague"></div>
+            </div>
+
+            <!-- Selector de Rutas -->
+            <div class="ruta-selector">
+                <label for="select-ruta">
+                    <i class="fas fa-list"></i> Selecciona una Ruta Disponible
+                </label>
+                <select id="select-ruta" name="ruta" class="form-control">
+                    <option value="">-- Cargando rutas disponibles --</option>
+                </select>
+            </div>
+
+            <!-- Info de Rutas Disponibles -->
+            <div class="rutas-info" id="rutas-container" style="display: none;">
+                <h4><i class="fas fa-route"></i> Rutas Disponibles (Zona Seleccionada)</h4>
+                <div id="rutas-list"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+            <button type="button" class="btn-custom btn-cancelar" onclick="window.history.back()">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button type="button" class="btn-custom btn-guardar" id="btn-asignar-ruta" disabled>
+                <i class="fas fa-check"></i> Asignar Ruta
+            </button>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+     //Script personalizado asignar ruta
+     
+    <script>
+        let map;
+        let selectedRuta = null;
+        const IBAGUE_CENTER = [4.4404, -75.2331];
+        const CONDUCTOR_ID = {{ conductor.id }};
+
+        const ZONAS = {
+            norte: {
+                nombre: 'Ruta 1 - Norte',
+                bounds: [[4.48, -75.27], [4.52, -75.22]],
+                color: '#3498db',
+                centro: [4.50, -75.245],
+                descripcion: 'Zona norte: Residencial, Clínica La Sagrada Familia, Campus UNAL'
+            },
+            centro: {
+                nombre: 'Ruta 2 - Centro',
+                bounds: [[4.42, -75.27], [4.46, -75.22]],
+                color: '#2ecc71',
+                centro: [4.44, -75.245],
+                descripcion: 'Centro histórico: Plaza Bolívar, Catedral, Comercio'
+            },
+            sur: {
+                nombre: 'Ruta 3 - Sur',
+                bounds: [[4.38, -75.27], [4.42, -75.22]],
+                color: '#e74c3c',
+                centro: [4.40, -75.245],
+                descripcion: 'Zona sur: Alborada, La Victoria, Estación'
+            }
+        };
+        //inicializar mapa
+        function initMap() {
+            map = L.map('mapa-ibague').setView(IBAGUE_CENTER, 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: ''
+            }).addTo(map);
+
+            drawZones();
+            loadRutasDisponibles();
+        }
+        //dibujar zonas en el mapa
+        function drawZones() {
+            Object.keys(ZONAS).forEach(key => {
+                const zona = ZONAS[key];
+                
+                const rectangle = L.rectangle(zona.bounds, {
+                    color: zona.color,
+                    weight: 3,
+                    opacity: 0.7,
+                    fillOpacity: 0.2,
+                    dashArray: '5, 5'
+                }).addTo(map);
+
+                const marker = L.circleMarker(zona.centro, {
+                    radius: 15,
+                    fillColor: zona.color,
+                    color: '#fff',
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <div style="text-align: center;">
+                        <strong style="font-size: 14px; color: ${zona.color};">${zona.nombre}</strong><br>
+                        <small>${zona.descripcion}</small><br>
+                        <button onclick="selectZona('${key}')" style="margin-top: 10px; padding: 8px 15px; background: ${zona.color}; color: white; border: none; border-radius: 5px; cursor: pointer;">Asignar Ruta</button>
+                    </div>
+                `, {
+                    closeButton: false
+                });
+            });
+        }
+
+        function selectZona(zonaKey) {
+            const zona = ZONAS[zonaKey];
+            map.closePopup();
+            map.fitBounds(zona.bounds);
+            filterRutasByZone(zonaKey);
+        }
+
+         //cargar rutas disponibles
+        function loadRutasDisponibles() {
+            $.ajax({
+                url: `/api/conductores/${CONDUCTOR_ID}/rutas/`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.rutas.length > 0) {
+                        const select = $('#select-ruta');
+                        select.empty();
+                        select.append('<option value="">-- Selecciona una ruta --</option>');
+                        
+                        response.rutas.forEach(ruta => {
+                            select.append(`<option value="${ruta.id}" data-zona="${ruta.zona}">${ruta.nombre}</option>`);
+                        });
+
+                        select.on('change', function() {
+                            selectedRuta = $(this).val();
+                            $('#btn-asignar-ruta').prop('disabled', !selectedRuta);
+                        });
+                    }
+                },
+                error: function() {
+                    $('#select-ruta').html('<option value="">Error al cargar rutas</option>');
+                }
+            });
+        }
+        //filtrar rutas por zona
+        function filterRutasByZone(zonaKey) {
+            $.ajax({
+                url: `/api/conductores/${CONDUCTOR_ID}/rutas/`,
+                method: 'GET',
+                success: function(response) {
+                    const zonaRutas = response.rutas.filter(r => r.zona.toLowerCase() === zonaKey);
+                    
+                    if (zonaRutas.length > 0) {
+                        const rutasList = $('#rutas-list').html('');
+                        
+                        zonaRutas.forEach(ruta => {
+                            rutasList.append(`
+                                <div class="ruta-item">
+                                    <strong>${ruta.nombre}</strong>
+                                    <small>Programado: ${ruta.fecha_programada}</small>
+                                </div>
+                            `);
+                        });
+                        
+                        $('#rutas-container').show();
+                    } else {
+                        $('#rutas-container').hide();
+                    }
+                }
+            });
+        }
+        //botton asignar ruta
+        $('#btn-asignar-ruta').on('click', function() {
+            if (!selectedRuta) {
+                alert('Por favor, selecciona una ruta');
+                return;
+            }
+
+            $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Asignando...');
+
+            $.ajax({
+                url: `/api/conductores/${CONDUCTOR_ID}/asignar-ruta/`,
+                method: 'POST',
+                data: {
+                    ruta_id: selectedRuta,
+                    csrfmiddlewaretoken: getCookie('csrftoken')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        window.history.back();
+                    } else {
+                        alert('Error: ' + response.message);
+                        $('#btn-asignar-ruta').prop('disabled', false).html('<i class="fas fa-check"></i> Asignar Ruta');
+                    }
+                },
+                error: function() {
+                    alert('Error al asignar la ruta');
+                    $('#btn-asignar-ruta').prop('disabled', false).html('<i class="fas fa-check"></i> Asignar Ruta');
+                }
+            });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        $(document).ready(function() {
+            initMap();
+        });
+    </script>
+</body>
+</html>

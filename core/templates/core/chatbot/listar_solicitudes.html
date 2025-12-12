@@ -1,0 +1,136 @@
+{% extends 'core/base_admin.html' %}
+
+{% block title %}Solicitudes de Soporte - EcoPuntos Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="text-dark">
+                <i class="fas fa-headset text-primary"></i> 
+                Solicitudes de Soporte Humano
+            </h3>
+            <p class="text-muted mb-0">Gestiona las solicitudes de chat directo con usuarios</p>
+        </div>
+        <div>
+            <a href="{% url 'conversaciones_activas' %}" class="btn btn-primary">
+                <i class="fas fa-comments"></i> Conversaciones Activas
+            </a>
+        </div>
+    </div>
+
+        <!-- Estadísticas rápidas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <h3 class="text-warning">{{ solicitudes|length }}</h3>
+                    <p class="text-muted mb-0">Total Solicitudes</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <h3 class="text-info">{{ solicitudes_pendientes|default:0 }}</h3>
+                    <p class="text-muted mb-0">Pendientes</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <h3 class="text-success">{{ solicitudes_aceptadas|default:0 }}</h3>
+                    <p class="text-muted mb-0">Aceptadas</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <h3 class="text-danger">{{ solicitudes_rechazadas|default:0 }}</h3>
+                    <p class="text-muted mb-0">Rechazadas</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de solicitudes -->
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Lista de Solicitudes</h4>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm">Todas</button>
+                    <button type="button" class="btn btn-outline-warning btn-sm">Pendientes</button>
+                    <button type="button" class="btn btn-outline-success btn-sm">Aceptadas</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm">Rechazadas</button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th><i class="fas fa-user me-2"></i>Usuario</th>
+                            <th><i class="fas fa-calendar me-2"></i>Fecha</th>
+                            <th><i class="fas fa-comment me-2"></i>Motivo</th>
+                            <th><i class="fas fa-flag me-2"></i>Estado</th>
+                            <th><i class="fas fa-cogs me-2"></i>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if solicitudes %}
+                            {% for solicitud in solicitudes %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">
+                                            <i class="fas fa-user-circle text-muted fa-lg"></i>
+                                        </div>
+                                        <div>
+                                            <strong>{{ solicitud.usuario.username }}</strong><br>
+                                            <small class="text-muted">{{ solicitud.usuario.email|default:"Sin email" }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <small>{{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                                </td>
+                                <td>
+                                    <span class="text-truncate" style="max-width: 200px; display: inline-block;" title="{{ solicitud.motivo }}">
+                                        {{ solicitud.motivo|default:"Sin motivo especificado" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if solicitud.estado == 'pendiente' %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-clock me-1"></i>Pendiente
+                                        </span>
+                                    {% elif solicitud.estado == 'aceptada' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Aceptada
+                                        </span>
+                                    {% elif solicitud.estado == 'rechazada' %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>Rechazada
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'gestionar_solicitud' solicitud.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Gestionar
+                                    </a>
+                                    {% if solicitud.conversacion %}
+                                        <a href="{% url 'ver_conversacion_chatbot' solicitud.conversacion.id %}" class="btn btn-info btn-sm ms-1">
+                                            <i class="fas fa-comments me-1"></i>Ver Chat
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                                    No hay solicitudes de soporte registradas
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Debug: archivos en {{ prefix }}/</h3>
+  {% if error %}
+    <div class="alert alert-danger">Error al listar archivos: {{ error }}</div>
+  {% endif %}
+  {% if files %}
+    <table class="table table-sm">
+      <thead><tr><th>Nombre</th><th>Ruta</th><th>Existe</th><th>Tamaño (bytes)</th></tr></thead>
+      <tbody>
+        {% for f in files %}
+          <tr>
+            <td>{{ f.name }}</td>
+            <td>{{ f.path }}</td>
+            <td>{% if f.exists %}✅{% else %}❌{% endif %}</td>
+            <td>{% if f.size %}{{ f.size }}{% else %}-{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No se encontraron archivos en <strong>{{ prefix }}/</strong>.</p>
+  {% endif %}
+  <a class="btn btn-secondary" href="{{ request.META.HTTP_REFERER|default:'/' }}">Volver</a>
+</div>
+{% endblock %}

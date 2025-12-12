@@ -1,0 +1,169 @@
+// Service Worker para EcoPuntos PWA
+const CACHE_NAME = 'ecopuntos-v1.0.0';
+const RUNTIME_CACHE = 'ecopuntos-runtime';
+const OFFLINE_URL = '/offline/';
+
+// Archivos estáticos para cachear en instalación
+const STATIC_CACHE_URLS = [
+  '/',
+  '/static/css/styles.css',
+  '/static/js/main.js',
+  '/static/pwa/manifest.json',
+  '/static/pwa/icons/icon-192x192.png',
+  '/static/pwa/icons/icon-512x512.png',
+  OFFLINE_URL
+];
+
+// Instalación del Service Worker
+self.addEventListener('install', (event) => {
+  console.log('[SW] Instalando Service Worker...');
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('[SW] Precacheando archivos estáticos');
+        return cache.addAll(STATIC_CACHE_URLS.map(url => new Request(url, {
+          cache: 'reload'
+        })));
+      })
+      .catch((error) => {
+        console.error('[SW] Error al cachear archivos:', error);
+      })
+  );
+  self.skipWaiting();
+});
+
+// Activación del Service Worker
+self.addEventListener('activate', (event) => {
+  console.log('[SW] Activando Service Worker...');
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE) {
+            console.log('[SW] Eliminando caché antigua:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  return self.clients.claim();
+});
+
+// Estrategia de caché: Network First con fallback a Cache
+self.addEventListener('fetch', (event) => {
+  // Ignorar solicitudes no HTTP/HTTPS
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+
+  // Ignorar solicitudes POST, PUT, DELETE (solo cachear GET)
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  event.respondWith(
+    // Intentar primero la red
+    fetch(event.request)
+      .then((response) => {
+        // Si la respuesta es válida, clonarla y guardarla en caché
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          
+          // Solo cachear respuestas de mismo origen
+          if (event.request.url.startsWith(self.location.origin)) {
+            caches.open(RUNTIME_CACHE).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
+        }
+        return response;
+      })
+      .catch(async (error) => {
+        // Si falla la red, buscar en caché
+        console.log('[SW] Red no disponible, buscando en caché:', event.request.url);
+        
+        const cachedResponse = await caches.match(event.request);
+        
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        // Si es una navegación y no hay caché, mostrar página offline
+        if (event.request.mode === 'navigate') {
+          const offlineResponse = await caches.match(OFFLINE_URL);
+          if (offlineResponse) {
+            return offlineResponse;
+          }
+        }
+
+        // Respuesta por defecto si nada funciona
+        return new Response('Sin conexión. Por favor verifica tu red.', {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: new Headers({
+            'Content-Type': 'text/plain'
+          })
+        });
+      })
+  );
+});
+
+// Manejo de mensajes desde el cliente
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    event.waitUntil(
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => caches.delete(cacheName))
+        );
+      })
+    );
+  }
+});
+
+// Sincronización en segundo plano
+self.addEventListener('sync', (event) => {
+  console.log('[SW] Sincronización en segundo plano:', event.tag);
+  if (event.tag === 'sync-data') {
+    event.waitUntil(syncData());
+  }
+});
+
+async function syncData() {
+  try {
+    // Aquí puedes agregar lógica de sincronización
+    console.log('[SW] Sincronizando datos...');
+  } catch (error) {
+    console.error('[SW] Error en sincronización:', error);
+  }
+}
+
+// Notificaciones push (opcional para futuro)
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push recibido');
+  const options = {
+    body: event.data ? event.data.text() : 'Nueva notificación de EcoPuntos',
+    icon: '/static/pwa/icons/icon-192x192.png',
+    badge: '/static/pwa/icons/icon-72x72.png',
+    vibrate: [200, 100, 200],
+    tag: 'ecopuntos-notification'
+  };
+
+  event.waitUntil(
+    self.registration.showNotification('EcoPuntos', options)
+  );
+});
+
+// Click en notificación
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notificación clickeada');
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/')
+  );
+});

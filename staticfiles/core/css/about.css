@@ -1,0 +1,367 @@
+/* ========================================
+   MISIÓN, VISIÓN Y PROPÓSITO
+   ======================================== */
+
+.card-modern {
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  padding: 40px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  height: 100%;
+  min-height: 350px;
+}
+
+.card-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  transition: height 0.3s ease;
+}
+
+.card-modern.card-mission::before {
+  background: linear-gradient(90deg, #4caf50, #81c784);
+}
+
+.card-modern.card-vision::before {
+  background: linear-gradient(90deg, #2196f3, #64b5f6);
+}
+
+.card-modern.card-purpose::before {
+  background: linear-gradient(90deg, #ff9800, #ffb74d);
+}
+
+.card-modern:hover::before {
+  height: 100%;
+}
+
+.card-modern:hover {
+  transform: translateY(-15px) scale(1.03);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.icon-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: white;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.card-mission .icon-circle {
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+}
+
+.card-vision .icon-circle {
+  background: linear-gradient(135deg, #2196f3, #42a5f5);
+  box-shadow: 0 10px 30px rgba(33, 150, 243, 0.3);
+}
+
+.card-purpose .icon-circle {
+  background: linear-gradient(135deg, #ff9800, #ffa726);
+  box-shadow: 0 10px 30px rgba(255, 152, 0, 0.3);
+}
+
+.card-modern:hover .icon-circle {
+  transform: rotateY(360deg) scale(1.1);
+}
+
+.icon-pulse {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border: 3px solid;
+  border-radius: 50%;
+  opacity: 0;
+  animation: icon-pulse-anim 2s ease-in-out infinite;
+}
+
+.card-mission .icon-pulse {
+  border-color: #4caf50;
+}
+
+.card-vision .icon-pulse {
+  border-color: #2196f3;
+}
+
+.card-purpose .icon-pulse {
+  border-color: #ff9800;
+}
+
+@keyframes icon-pulse-anim {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+
+.card-content {
+  position: relative;
+  z-index: 2;
+}
+
+.card-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.card-mission .card-title {
+  color: #2e7d32;
+}
+
+.card-vision .card-title {
+  color: #1565c0;
+}
+
+.card-purpose .card-title {
+  color: #e65100;
+}
+
+.card-modern:hover .card-title {
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.card-text {
+  color: #555;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 25px;
+  transition: all 0.3s ease;
+}
+
+.card-modern:hover .card-text {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.card-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  color: #666;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.feature-icon {
+  font-size: 1.2rem;
+  min-width: 25px;
+}
+
+.card-mission .feature-icon {
+  color: #4caf50;
+}
+
+.card-vision .feature-icon {
+  color: #2196f3;
+}
+
+.card-purpose .feature-icon {
+  color: #ff9800;
+}
+
+.card-modern:hover .feature-item {
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.card-modern:hover .feature-icon {
+  color: white;
+  transform: scale(1.2);
+}
+
+/* ========================================
+   VALORES - Sección de Valores Corporativos
+   ======================================== */
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  margin-top: 50px;
+}
+
+.value-card {
+  background: white;
+  border-radius: 20px;
+  padding: 35px 25px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.value-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #4caf50, #81c784);
+  transition: left 0.3s ease;
+  z-index: 1;
+}
+
+.value-card:hover::before {
+  left: 0;
+}
+
+.value-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(76, 175, 80, 0.2);
+}
+
+.value-icon-wrapper {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 20px;
+}
+
+.value-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+  transition: all 0.3s ease;
+}
+
+.value-card:hover .value-icon {
+  background: white;
+  color: #4caf50;
+  transform: scale(1.1);
+}
+
+.value-title {
+  position: relative;
+  z-index: 2;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2e7d32;
+  margin-bottom: 15px;
+  transition: color 0.3s ease;
+}
+
+.value-card:hover .value-title {
+  color: white;
+}
+
+.value-desc {
+  position: relative;
+  z-index: 2;
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.6;
+  transition: color 0.3s ease;
+}
+
+.value-card:hover .value-desc {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .card-modern {
+    padding: 30px 20px;
+    min-height: auto;
+    margin-bottom: 30px;
+  }
+
+  .card-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+  }
+
+  .icon-circle {
+    width: 80px;
+    height: 80px;
+    font-size: 2.5rem;
+  }
+
+  .icon-pulse {
+    width: 100px;
+    height: 100px;
+  }
+
+  .card-title {
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+  }
+
+  .card-text {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+
+  .feature-item {
+    font-size: 0.95rem;
+    padding: 8px 0;
+  }
+
+  .values-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .value-card {
+    padding: 25px 20px;
+  }
+
+  .value-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.8rem;
+  }
+
+  .value-title {
+    font-size: 1.2rem;
+  }
+
+  .value-desc {
+    font-size: 0.95rem;
+  }
+}

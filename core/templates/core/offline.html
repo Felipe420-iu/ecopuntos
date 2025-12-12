@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sin Conexión - EcoPuntos</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #4CAF50 0%, #388e3c 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .offline-container {
+      max-width: 500px;
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+    
+    .retry-btn {
+      background: white;
+      color: #4CAF50;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .retry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    .features {
+      margin-top: 40px;
+      text-align: left;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      opacity: 0.9;
+    }
+    
+    .feature-item i {
+      font-size: 24px;
+      margin-right: 15px;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="offline-container">
+    <div class="icon">
+      <i class="fas fa-wifi-slash"></i>
+    </div>
+    
+    <h1>Sin Conexión</h1>
+    
+    <p>
+      Parece que no tienes conexión a Internet en este momento. 
+      EcoPuntos necesita conexión para funcionar correctamente.
+    </p>
+    
+    <button class="retry-btn" onclick="window.location.reload()">
+      <i class="fas fa-sync-alt"></i> Reintentar
+    </button>
+    
+    <div class="features">
+      <div class="feature-item">
+        <i class="fas fa-leaf"></i>
+        <span>Mientras tanto, recuerda seguir reciclando</span>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-recycle"></i>
+        <span>Cada acción cuenta para el medio ambiente</span>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-heart"></i>
+        <span>Gracias por ser parte de EcoPuntos</span>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Intentar reconectar automáticamente
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    function checkConnection() {
+      if (navigator.onLine) {
+        window.location.href = '/';
+      } else if (retryCount < maxRetries) {
+        retryCount++;
+        setTimeout(checkConnection, 5000); // Reintentar cada 5 segundos
+      }
+    }
+    
+    // Escuchar evento de conexión
+    window.addEventListener('online', () => {
+      window.location.href = '/';
+    });
+    
+    // Iniciar verificación
+    setTimeout(checkConnection, 3000);
+  </script>
+</body>
+</html>

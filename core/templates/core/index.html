@@ -1,0 +1,1366 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Eco Puntos - Plataforma de reciclaje inteligente que convierte tus materiales reciclables en puntos canjeables. Únete a la revolución verde y gana recompensas cuidando el planeta.">
+  <meta name="keywords" content="reciclaje, eco puntos, sostenibilidad, medio ambiente, recompensas, plástico, vidrio, papel, metales">
+  <meta name="author" content="Eco Puntos">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Eco Puntos - Reciclaje Inteligente">
+  <meta property="og:description" content="Convierte tus materiales reciclables en puntos canjeables. Únete a la revolución verde.">
+  <meta property="og:image" content="{% static 'core/img/eco.jpg' %}">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="Eco Puntos - Reciclaje Inteligente">
+  <meta property="twitter:description" content="Convierte tus materiales reciclables en puntos canjeables. Únete a la revolución verde.">
+  <meta property="twitter:image" content="{% static 'core/img/eco.jpg' %}">
+  
+  <title>Eco Puntos - Reciclaje Inteligente | Convierte Residuos en Recompensas</title>
+  
+  <!-- Preload critical resources -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'core/css/style.css' %}?v=20251117">
+  <!-- Custom Modular CSS Files -->
+  <link rel="stylesheet" href="{% static 'core/css/index-styles.css' %}?v=20251117">
+  <link rel="stylesheet" href="{% static 'core/css/navbar.css' %}?v=20251117">
+  <link rel="stylesheet" href="{% static 'core/css/how-it-works.css' %}?v=20251117">
+  <link rel="stylesheet" href="{% static 'core/css/about.css' %}?v=20251117">
+  <link rel="stylesheet" href="{% static 'core/css/categories.css' %}?v=20251117">
+  <link rel="stylesheet" href="{% static 'core/css/components.css' %}?v=20251117">
+  <link rel="stylesheet" href="{% static 'core/css/footer.css' %}?v=20251117">
+  <link rel="stylesheet" href="{% static 'core/css/impact.css' %}?v=20251117">
+  <style>
+    /* Fix: evitar background-attachment: fixed en móviles (causa layout raro en muchos navegadores móviles) */
+    @media (max-width: 768px) {
+      #como-funciona, body {
+        background-attachment: scroll !important;
+        background-size: cover !important;
+      }
+
+      /* Asegurar que elementos hero y contenedores no excedan ancho */
+      #hero, .hero-content, .container {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <!-- Skip to main content for accessibility -->
+  <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+
+  <!-- Estilos básicos de página (minimal inline CSS) -->
+  
+
+  <!-- Nueva barra de navegación moderna -->
+  <nav class="navbar navbar-expand-lg navbar-eco">
+    <div class="container">
+      <!-- Logo y nombre -->
+      <a class="navbar-brand-eco" href="#">
+        <img src="{% static 'core/img/eco.jpg' %}" alt="Logo Eco Puntos" class="logo-eco">
+        <h1 class="brand-text">Eco Puntos</h1>
+      </a>
+      
+      <!-- Botón de hamburguesa personalizado -->
+      <button class="navbar-toggler navbar-toggler-eco" type="button" data-bs-toggle="collapse" data-bs-target="#navbarEco" aria-controls="navbarEco" aria-expanded="false" aria-label="Toggle navigation">
+        <div class="navbar-toggler-icon-eco">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+      
+      <!-- Menú de navegación -->
+      <div class="collapse navbar-collapse" id="navbarEco">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item nav-item-eco">
+            <a class="nav-link nav-link-eco active" href="#hero">Inicio</a>
+          </li>
+          <li class="nav-item nav-item-eco">
+            <a class="nav-link nav-link-eco" href="#como-funciona">¿Como Funciona?</a>
+          </li>
+          <li class="nav-item nav-item-eco">
+            <a class="nav-link nav-link-eco" href="#nosotros">Quiénes Somos</a>
+          </li>
+          <li class="nav-item nav-item-eco">
+            <a class="nav-link nav-link-eco" href="#categorias">Categorías</a>
+          </li>
+        </ul>
+        <!-- Botones de acceso -->
+        <div class="navbar-buttons d-flex align-items-center">
+          <a href="{% url 'iniciosesion' %}" class="btn btn-login">
+            <i class="fas fa-user-circle me-1"></i> Iniciar Sesión
+          </a>
+          <a href="{% url 'registrate' %}" class="btn btn-register ms-2">
+            <i class="fas fa-user-plus me-1"></i> Registrarse
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="main-content">
+
+    <!-- Sección Hero Modificada -->
+    <section id="hero">
+      <img src="" alt="">
+      <div class="hero-content" style="animation: none !important; transform: none !important;">
+        <h1 style="animation: none !important; transform: none !important;">NO VENDEMOS MAGIA  |  ¡LA RECICLAMOS!</h1>
+        <p>En EcoPuntos, lo imposible se convierte en puntos y los puntos en impacto.</p>
+        <a href="#como-funciona" class="btn btn-hero">mira como funciona</a>
+      </div>
+    </section>
+
+    <!-- Sección ¿Cómo Funciona? REDISEÑADA SÚPER MODERNA -->
+    <section id="como-funciona" class="py-5" style="background: linear-gradient(rgba(76, 175, 80, 0.85), rgba(139, 195, 74, 0.85), rgba(129, 199, 132, 0.85)), url('{% static 'core/img/arbol.jpg' %}'); background-size: cover; background-position: center; background-attachment: fixed; position: relative; overflow: hidden;">
+      <!-- Efectos de fondo animados -->
+      <div class="floating-shapes">
+        <div class="shape-circle circle-1"></div>
+        <div class="shape-circle circle-2"></div>
+        <div class="shape-circle circle-3"></div>
+        <div class="shape-polygon polygon-1"></div>
+        <div class="shape-polygon polygon-2"></div>
+      </div>
+      
+      <!-- Partículas flotantes -->
+      <div class="particles-bg"></div>
+      
+      <div class="container" style="position: relative; z-index: 10;">
+        <!-- Header súper moderno -->
+        <div class="section-header text-center mb-5">
+          <div class="badge-modern">
+            <span class="badge-glow">✨</span>
+            <span class="badge-text">Proceso Inteligente</span>
+            <span class="badge-glow">🚀</span>
+          </div>
+          <h1 class="modern-title">
+            <span class="title-gradient">¿Cómo</span>
+            <span class="title-outline">Funciona?</span>
+          </h1>
+          <div class="title-underline">
+            <div class="underline-animated"></div>
+          </div>
+          <p class="modern-subtitle">
+            🌟 Convierte tus residuos en recompensas con solo 4 pasos súper fáciles
+          </p>
+        </div>
+        
+        <!-- Steps Container Rediseñado -->
+        <div class="steps-modern-container">
+          <!-- Línea conectora animada -->
+          <div class="connection-line">
+            <div class="line-progress"></div>
+          </div>
+          
+          <div class="row justify-content-center">
+            <!-- Paso 1: Regístrate -->
+            <div class="col-lg-3 col-md-6 mb-4">
+              <div class="step-card-modern" data-step="1">
+                <div class="step-glow-effect"></div>
+                <div class="step-number-modern">
+                  <span class="number-bg">1</span>
+                  <div class="number-pulse"></div>
+                </div>
+                <div class="step-icon-modern register-icon">
+                  <div class="icon-bg">
+                    <i class="fas fa-user-plus"></i>
+                  </div>
+                  <div class="icon-particles">
+                    <span class="particle p1">✨</span>
+                    <span class="particle p2">⭐</span>
+                    <span class="particle p3">👍</span>
+                  </div>
+                </div>
+                <div class="step-content-modern">
+                  <h3 class="step-title-modern">Regístrate</h3>
+                  <p class="step-desc-modern">Crea tu cuenta gratuita en segundos y únete a la revolución verde</p>
+                  <div class="step-benefits">
+                    <span class="benefit-tag">🎯 Rápido</span>
+                    <span class="benefit-tag">🔒 Seguro</span>
+                  </div>
+                </div>
+                <div class="step-arrow">
+                  <i class="fas fa-arrow-right"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Paso 2: Recicla -->
+            <div class="col-lg-3 col-md-6 mb-4">
+              <div class="step-card-modern" data-step="2">
+                <div class="step-glow-effect"></div>
+                <div class="step-number-modern">
+                  <span class="number-bg">2</span>
+                  <div class="number-pulse"></div>
+                </div>
+                <div class="step-icon-modern recycle-icon">
+                  <div class="icon-bg">
+                    <i class="fas fa-recycle"></i>
+                  </div>
+                  <div class="icon-particles">
+                    <span class="particle p1">♻️</span>
+                    <span class="particle p2">🌿</span>
+                    <span class="particle p3">🌱</span>
+                  </div>
+                </div>
+                <div class="step-content-modern">
+                  <h3 class="step-title-modern">Recicla</h3>
+                  <p class="step-desc-modern">Lleva tus materiales a nuestros centros eco-inteligentes cercanos a tu ubicación</p>
+                  <div class="step-benefits">
+                    <span class="benefit-tag">📍 Cerca de ti</span>
+                    <span class="benefit-tag">⚡ Fácil</span>
+                  </div>
+                </div>
+                <div class="step-arrow">
+                  <i class="fas fa-arrow-right"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Paso 3: Gana Puntos -->
+            <div class="col-lg-3 col-md-6 mb-4">
+              <div class="step-card-modern" data-step="3">
+                <div class="step-glow-effect"></div>
+                <div class="step-number-modern">
+                  <span class="number-bg">3</span>
+                  <div class="number-pulse"></div>
+                </div>
+                <div class="step-icon-modern points-icon">
+                  <div class="icon-bg">
+                    <i class="fas fa-coins"></i>
+                  </div>
+                  <div class="icon-particles">
+                    <span class="particle p1">💰</span>
+                    <span class="particle p2">⭐</span>
+                    <span class="particle p3">ðŸ†</span>
+                  </div>
+                </div>
+                <div class="step-content-modern">
+                  <h3 class="step-title-modern">Gana Puntos</h3>
+                  <p class="step-desc-modern">Recibe puntos automáticamente por cada material reciclado</p>
+                  <div class="step-benefits">
+                    <span class="benefit-tag">💎 Valiosos</span>
+                    <span class="benefit-tag">📈 Acumulables</span>
+                  </div>
+                </div>
+                <div class="step-arrow">
+                  <i class="fas fa-arrow-right"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Paso 4: Canjea -->
+            <div class="col-lg-3 col-md-6 mb-4">
+              <div class="step-card-modern" data-step="4">
+                <div class="step-glow-effect"></div>
+                <div class="step-number-modern">
+                  <span class="number-bg">4</span>
+                  <div class="number-pulse"></div>
+                </div>
+                <div class="step-icon-modern rewards-icon">
+                  <div class="icon-bg">
+                    <i class="fas fa-gift"></i>
+                  </div>
+                  <div class="icon-particles">
+                    <span class="particle p1">🎁</span>
+                    <span class="particle p2">🎁</span>
+                    <span class="particle p3">👍</span>
+                  </div>
+                </div>
+                <div class="step-content-modern">
+                  <h3 class="step-title-modern">¡Disfruta!</h3>
+                  <p class="step-desc-modern">Canjea por productos increíbles, descuentos y experiencias únicas</p>
+                  <div class="step-benefits">
+
+                    <span class="benefit-tag">🥇 Variedad</span>
+                    <span class="benefit-tag">🎁 Exclusivo</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Call to Action Súper Moderno -->
+        <div class="cta-modern-container">
+          <div class="cta-modern-card">
+            <div class="cta-bg-effects">
+              <div class="effect-1"></div>
+              <div class="effect-2"></div>
+              <div class="effect-3"></div>
+            </div>
+            <div class="cta-content">
+              <h2 class="cta-title">¿Listo para comenzar tu aventura ecológica? 🌟</h2>
+              <p class="cta-subtitle">Únete a nuestra comunidad de eco-warriors que están ganando mientras salvan el planeta</p>
+              <div class="cta-buttons">
+                <a href="{% url 'registrate' %}" class="btn-cta-primary">
+                  <span class="btn-text">🚀 Comenzar Ahora</span>
+                  <span class="btn-shine"></span>
+                </a>
+                <a href="#categorias" class="btn-cta-secondary">
+                  <span class="btn-text">👍 Ver Categorías</span>
+                </a>
+              </div>
+              <div class="cta-stats">
+                <div class="stat-item">
+                  <span class="stat-number">{{ estadisticas.materiales_reciclados }}</span>
+                  <span class="stat-label">Materiales Reciclados (kg)</span>
+                </div>
+                <div class="stat-divider">|</div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ estadisticas.usuarios_activos }}</span>
+                  <span class="stat-label">Usuarios Activos</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Estilos Súper Modernos para Cómo Funciona -->
+    
+
+    <!-- Sección de Testimonios -->
+    <section class="py-5" style="background-color: #f8f9fa;">
+      <div class="container">
+        <div class="section-header text-center mb-5">
+          <span class="badge bg-success px-3 py-2 mb-2">Testimonios</span>
+          <h2 style="color:#000000; font-weight: 700;">Lo Que Dicen Nuestros Usuarios</h2>
+          <div class="divider mx-auto my-3"></div>
+        </div>
+        
+        <div class="testimonial-carousel">
+          <div class="row">
+            {% for user in testimonios %}
+            <div class="col-md-4 mb-4">
+              <div class="testimonial-card">
+                <div class="testimonial-image">
+                  {% if user.foto_perfil %}
+                    <img src="{{ user.foto_perfil.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                  {% else %}
+                    <img src="{% static 'core/img/default_profile.png' %}" alt="{{ user.get_full_name|default:user.username }}">
+                  {% endif %}
+                </div>
+                <div class="testimonial-content" style="color: #5fd84f;">
+                  <p class="testimonial-text" style="color: #000000;">"{{ user.testimonio }}"</p>
+                  <h4 class="testimonial-name" style="color: #000000;">{{ user.get_full_name|default:user.username }}</h4>
+                  <span class="testimonial-role" style="color: #000000;">Usuario Activo</span>
+                </div>
+              </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+              <p>No hay testimonios disponibles aún. ¡Sé el primero en dejar el tuyo!</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <!-- Sección Nosotros (Quiénes Somos) REDISEÑADA -->
+    <section id="nosotros" class="py-5" style="background: linear-gradient(135deg, #b2e676 0%, #a8e063 50%, #9dd458 100%); position: relative; overflow: hidden;">
+      <!-- Decoración de fondo -->
+      <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+      </div>
+      
+      <div class="container" style="position: relative; z-index: 2;">
+        <!-- Encabezado mejorado -->
+        <div class="section-header text-center mb-5">
+          <span class="badge bg-white text-success px-4 py-2 mb-3" style="border-radius: 50px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <i class="fas fa-users me-2"></i>Conócenos
+          </span>
+          <h1 style="color: #1b5e20; font-weight: 800; font-size: clamp(2.5rem, 5vw, 3.5rem); text-shadow: 2px 2px 4px rgba(255,255,255,0.7);">
+            Quiénes Somos
+          </h1>
+          <div class="divider mx-auto my-4" style="height: 4px; width: 80px; background: linear-gradient(90deg, #1b5e20, #4caf50, #81c784); border-radius: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"></div>
+          <p class="lead" style="color: #021303; font-weight: 500; max-width: 600px; margin: 0 auto; font-size: 1.2rem;">
+            🌱 Somos pioneros en transformar el reciclaje en una experiencia gratificante que beneficia tanto a las personas como al planeta
+          </p>
+        </div>
+        
+        <!-- Historia de la empresa -->
+        <div class="row mb-5 align-items-center">
+          <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="story-content">
+              <div class="story-icon mb-3">
+                <i class="fas fa-rocket"></i>
+              </div>
+              <h2 style="color: #1b5e20; font-weight: 700; margin-bottom: 20px;">Nuestra Historia</h2>
+              <p style="color: #031f04; font-size: 1.1rem; line-height: 1.7; margin-bottom: 20px;">
+                <strong>Eco Puntos</strong> nació de una visión simple pero poderosa: <em>hacer que cada acción de reciclaje cuente</em>. 
+                Fundada en 2023 por un equipo de jóvenes emprendedores apasionados por el medio ambiente, nuestra plataforma 
+                revoluciona la forma en que las personas perciben el reciclaje.
+              </p>
+              <p style="color: #031d04; font-size: 1rem; line-height: 1.6;">
+                Lo que comenzó como un proyecto universitario se ha convertido en una solución real que conecta 
+                a miles de personas con un futuro más sostenible, convirtiendo residuos en oportunidades y 
+                generando un impacto positivo en comunidades de toda Colombia.
+              </p>
+              <div class="founder-info mt-4 p-3" style="background: rgba(255,255,255,0.7); border-radius: 15px; border-left: 4px solid #4caf50;">
+                <p class="mb-0" style="color: #1b5e20; font-style: italic;">
+                  <i class="fas fa-quote-left text-success me-2"></i>
+                  "Creemos que el cambio comienza con pequeñas acciones que, juntas, crean un gran impacto."
+                  <br><small class="text-muted">- Equipo Fundador de Eco Puntos</small>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="story-visual">
+              <div class="video-container shadow-lg rounded overflow-hidden" style="border: 3px solid rgba(255,255,255,0.5);">
+                <div class="video-overlay">
+                  <div class="play-button">
+                    <i class="fas fa-play"></i>
+                  </div>
+                  <div class="video-text">
+                    <h5 style="color: white; font-weight: 600;">Conoce nuestra historia</h5>
+                  </div>
+                </div>
+                <video controls width="100%" poster="{% static 'core/img/video-poster.jpg' %}">
+                  <source src="{% static 'core/media/eco.mp4' %}" type="video/mp4">
+                  Tu navegador no soporta el elemento de video.
+                </video>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Misión, Visión y Propósito en cards mejoradas -->
+        <div class="row mb-5">
+          <!-- Tarjeta de Misión -->
+          <div class="col-lg-4 mb-4">
+            <div class="card h-100 border-0 mission-card">
+              <div class="card-body p-4 text-center">
+                <div class="mission-icon mb-4">
+                  <i class="fas fa-bullseye"></i>
+                </div>
+                <h3 class="card-title mb-3" style="color: #1b5e20; font-weight: 700;">Nuestra Misión</h3>
+                <p class="card-text" style="color: #2e7d32; font-size: 1rem; line-height: 1.6;">
+                  Democratizar el reciclaje haciendo que cada persona pueda <strong>convertir sus residuos en beneficios tangibles</strong>, 
+                  creando un ecosistema donde la sostenibilidad y la recompensa van de la mano para construir un futuro más verde y próspero.
+                </p>
+                <div class="mission-stats mt-4">
+                  <div class="stat-item">
+                    <span class="stat-number">{{ estadisticas.usuarios_activos }}</span>
+                    <span class="stat-label">Usuarios Activos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Tarjeta de Visión -->
+          <div class="col-lg-4 mb-4">
+            <div class="card h-100 border-0 vision-card">
+              <div class="card-body p-4 text-center">
+                <div class="vision-icon mb-4">
+                  <i class="fas fa-eye"></i>
+                </div>
+                <h3 class="card-title mb-3" style="color: #1b5e20; font-weight: 700;">Nuestra Visión</h3>
+                <p class="card-text" style="color: #2e7d32; font-size: 1rem; line-height: 1.6;">
+                  Ser la <strong>plataforma líder en América Latina</strong> que transforme la relación de las personas con el reciclaje, 
+                  convirtiendo cada acción ambiental en una oportunidad de crecimiento personal y comunitario.
+                </p>
+                <div class="vision-goal mt-4 p-3" style="background: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(129,199,132,0.1)); border-radius: 10px;">
+                  <p class="mb-0" style="color: #1b5e20; font-weight: 600;">
+                    <i class="fas fa-target text-success me-2"></i>
+                    Meta 2025: 50,000 usuarios activos
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Tarjeta de Propósito -->
+          <div class="col-lg-4 mb-4">
+            <div class="card h-100 border-0 purpose-card">
+              <div class="card-body p-4 text-center">
+                <div class="purpose-icon mb-4">
+                  <i class="fas fa-heart"></i>
+                </div>
+                <h3 class="card-title mb-3" style="color: #1b5e20; font-weight: 700;">Nuestro Propósito</h3>
+                <p class="card-text" style="color: #2e7d32; font-size: 1rem; line-height: 1.6;">
+                  Inspirar un <strong>movimiento global de consciencia ambiental</strong> donde cada persona se sienta motivada 
+                  y recompensada por contribuir a la salud del planeta, creando comunidades más sostenibles y prósperas.
+                </p>
+                <div class="purpose-impact mt-4">
+                  <div class="impact-badge">
+                    <span>🌍 Impacto Real</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Valores rediseñados -->
+        <div class="values-section">
+          <div class="row">
+            <div class="col-12 text-center mb-5">
+              <h2 style="color: #1b5e20; font-weight: 700; font-size: 2.5rem;">Nuestros Valores Fundamentales</h2>
+              <div class="divider mx-auto my-3" style="height: 3px; width: 100px; background: linear-gradient(90deg, #1b5e20, #4caf50); border-radius: 2px;"></div>
+              <p style="color: #2e7d32; font-size: 1.1rem; max-width: 500px; margin: 0 auto;">
+                Estos principios guían cada decisión y acción en nuestro compromiso con el planeta
+              </p>
+            </div>
+          </div>
+          
+          <div class="row">
+            <!-- Valor 1: Innovación -->
+            <div class="col-lg-3 col-md-6 mb-4">
+              <div class="valor-card modern-card">
+                <div class="valor-icon-wrapper">
+                  <div class="valor-icon innovation-icon">
+                    <i class="fas fa-lightbulb"></i>
+                  </div>
+                </div>
+                <h4>Innovación</h4>
+                <p>Desarrollamos soluciones tecnológicas creativas que hacen del reciclaje una experiencia moderna y atractiva para todos.</p>
+                <div class="valor-feature">
+                  <span class="feature-tag">🚀 Tecnología Verde</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Valor 2: Transparencia -->
+            <div class="col-lg-3 col-md-6 mb-4">
+              <div class="valor-card modern-card">
+                <div class="valor-icon-wrapper">
+                  <div class="valor-icon transparency-icon">
+                    <i class="fas fa-eye"></i>
+                  </div>
+                </div>
+                <h4>Transparencia</h4>
+                <p>Operamos con total claridad en nuestros procesos, recompensas y impacto ambiental, construyendo confianza con nuestra comunidad.</p>
+                <div class="valor-feature">
+                  <span class="feature-tag">💎 Confianza Total</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Valor 3: Sostenibilidad -->
+            <div class="col-lg-3 col-md-6 mb-4">
+              <div class="valor-card modern-card">
+                <div class="valor-icon-wrapper">
+                  <div class="valor-icon sustainability-icon">
+                    <i class="fas fa-leaf"></i>
+                  </div>
+                </div>
+                <h4>Sostenibilidad</h4>
+                <p>Cada decisión que tomamos está diseñada para generar un impacto positivo duradero en el medio ambiente y las comunidades.</p>
+                <div class="valor-feature">
+                  <span class="feature-tag">🌱 Impacto Real</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Valor 4: Empoderamiento -->
+            <div class="col-lg-3 col-md-6 mb-4">
+              <div class="valor-card modern-card">
+                <div class="valor-icon-wrapper">
+                  <div class="valor-icon empowerment-icon">
+                    <i class="fas fa-users"></i>
+                  </div>
+                </div>
+                <h4>Empoderamiento</h4>
+                <p>Capacitamos a las personas para que se conviertan en agentes de cambio, dándoles las herramientas para generar ingresos y proteger el planeta.</p>
+                <div class="valor-feature">
+                  <span class="feature-tag">👍ª Cambio Real</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Llamada a la acción -->
+          <div class="row mt-5">
+            <div class="col-12 text-center">
+              <div class="cta-section p-4" style="background: rgba(255,255,255,0.9); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 style="color: #1b5e20; font-weight: 700; margin-bottom: 15px;">¿Listo para ser parte del cambio?</h3>
+                <p style="color: #2e7d32; margin-bottom: 20px; font-size: 1.1rem;">
+                  Únete a nuestra comunidad de eco-warriors y comienza a ganar mientras cuidas el planeta
+                </p>
+                <div class="cta-buttons">
+                  <a href="{% url 'registrate' %}" class="btn btn-success btn-lg me-3" style="border-radius: 30px; padding: 12px 30px; font-weight: 600; box-shadow: 0 4px 15px rgba(76,175,80,0.3);">
+                    <i class="fas fa-rocket me-2"></i>Comenzar Ahora
+                  </a>
+                  <a href="#categorias" class="btn btn-outline-success btn-lg" style="border-radius: 30px; padding: 12px 30px; font-weight: 600;">
+                    <i class="fas fa-info-circle me-2"></i>Saber Más
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    
+    <!-- Sección de Categorías REDISEÑADA -->
+    <section id="categorias" class="py-5" style="background: linear-gradient(135deg, rgba(42, 142, 53, 0.95), rgba(66, 165, 79, 0.95)), url('{% static 'core/img/eco-background.jpg' %}'); background-size: cover; background-attachment: fixed; position: relative;">
+      <!-- Overlay decorativo -->
+      <div class="categories-overlay"></div>
+      
+      <div class="container" style="position: relative; z-index: 2;">
+        <!-- Encabezado mejorado -->
+        <div class="section-header text-center mb-5">
+          <span class="badge bg-white text-success px-4 py-2 mb-3" style="border-radius: 50px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.15); font-size: 1rem;">
+            <i class="fas fa-recycle me-2"></i>Materiales Reciclables
+          </span>
+          <h2 class="category-title" style="color: #ffffff; font-weight: 800; font-size: clamp(2rem, 5vw, 3rem); text-shadow: 2px 2px 8px rgba(0,0,0,0.4); margin-bottom: 20px;">
+            Explora Categorías de Reciclaje
+          </h2>
+          <div class="divider mx-auto my-4" style="height: 4px; width: 100px; background: linear-gradient(90deg, #ffffff, #e8f5e8); border-radius: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"></div>
+          <p class="lead" style="color: #e8f5e8; font-weight: 500; max-width: 700px; margin: 0 auto; font-size: 1.2rem; text-shadow: 1px 1px 4px rgba(0,0,0,0.3);">
+            Transforma cada material en oportunidades reales. Descubre cuánto puedes ganar mientras cuidas el planeta 🌍
+          </p>
+        </div>
+
+        <!-- Grid de categorías mejorado -->
+        <div class="row g-4 mb-5">
+                    <!-- Categoría Plásticos -->
+          <div class="col-lg-3 col-md-6">
+            <div class="categoria-card-modern plasticos-card">
+              <div class="card-header-gradient plasticos-gradient">
+                <div class="category-badge-modern popular">
+                  <i class="fas fa-fire"></i>
+                  <span>Más Popular</span>
+                </div>
+                <div class="category-icon-modern">
+                  <i class="fas fa-wine-bottle"></i>
+                </div>
+              </div>
+              <div class="category-visual">
+                <div class="background-pattern plasticos-pattern"></div>
+                <video autoplay muted loop class="category-video">
+                  <source src="{% static 'core/media/plastico.mp4' %}" type="video/mp4">
+                  <img src="{% static 'core/img/plasticos.jpg' %}" alt="Reciclaje de Plásticos" loading="lazy">
+                </video>
+                <div class="stats-overlay">
+                  <div class="stat-circle">
+                    <span class="stat-number">15</span>
+                    <span class="stat-label">pts/kg</span>
+                  </div>
+                  <div class="impact-badge-modern high">
+                    Alto Impacto
+                  </div>
+                </div>
+              </div>
+              <div class="category-info">
+                <h3 class="category-title-modern">Plásticos</h3>
+                <p class="category-description">Botellas, envases, tapas y más. Cada plástico reciclado reduce la contaminación marina y terrestre.</p>
+                <div class="category-benefits">
+                  <span class="benefit-tag eco">♻️ Reutilizable</span>
+                  <span class="benefit-tag profit">💰 Rentable</span>
+                </div>
+                <button onclick="window.location.href='{% url 'registrate' %}'" class="btn-reciclar-modern plasticos">
+                  <span class="btn-icon">🚀</span>
+                  <span class="btn-text">Comenzar a Reciclar</span>
+                  <div class="btn-ripple"></div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categoría Vidrio -->
+          <div class="col-lg-3 col-md-6">
+            <div class="categoria-card-modern vidrio-card">
+              <div class="card-header-gradient vidrio-gradient">
+                <div class="category-badge-modern eco">
+                  <i class="fas fa-infinity"></i>
+                  <span>100% Reciclable</span>
+                </div>
+                <div class="category-icon-modern">
+                  <i class="fas fa-wine-glass"></i>
+                </div>
+              </div>
+              <div class="category-visual">
+                <div class="background-pattern vidrio-pattern"></div>
+                <video autoplay muted loop class="category-video">
+                  <source src="{% static 'core/media/vidrio.mp4' %}" type="video/mp4">
+                  <img src="{% static 'core/img/vidrio.jpg' %}" alt="Reciclaje de Vidrio" loading="lazy">
+                </video>
+                <div class="stats-overlay">
+                  <div class="stat-circle">
+                    <span class="stat-number">10</span>
+                    <span class="stat-label">pts/kg</span>
+                  </div>
+                  <div class="impact-badge-modern medium">
+                    Impacto Medio
+                  </div>
+                </div>
+              </div>
+              <div class="category-info">
+                <h3 class="category-title-modern">Vidrio</h3>
+                <p class="category-description">Frascos, botellas y cristales. El vidrio puede reciclarse infinitamente sin perder calidad ni pureza.</p>
+                <div class="category-benefits">
+                  <span class="benefit-tag infinite">♾️ Infinito</span>
+                  <span class="benefit-tag pure">✨ Puro</span>
+                </div>
+                <button onclick="window.location.href='{% url 'registrate' %}'" class="btn-reciclar-modern vidrio">
+                  <span class="btn-icon">💎</span>
+                  <span class="btn-text">Comenzar a Reciclar</span>
+                  <div class="btn-ripple"></div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categoría Papel -->
+          <div class="col-lg-3 col-md-6">
+            <div class="categoria-card-modern papel-card">
+              <div class="card-header-gradient papel-gradient">
+                <div class="category-badge-modern trees">
+                  <i class="fas fa-tree"></i>
+                  <span>Salva Árboles</span>
+                </div>
+                <div class="category-icon-modern">
+                  <i class="fas fa-file-alt"></i>
+                </div>
+              </div>
+              <div class="category-visual">
+                <div class="background-pattern papel-pattern"></div>
+                <video autoplay muted loop class="category-video">
+                  <source src="{% static 'core/media/papelycarton.mp4' %}" type="video/mp4">
+                  <img src="{% static 'core/img/papel.jpg' %}" alt="Reciclaje de Papel" loading="lazy">
+                </video>
+                <div class="stats-overlay">
+                  <div class="stat-circle">
+                    <span class="stat-number">8</span>
+                    <span class="stat-label">pts/kg</span>
+                  </div>
+                  <div class="impact-badge-modern high">
+                    Alto Impacto
+                  </div>
+                </div>
+              </div>
+              <div class="category-info">
+                <h3 class="category-title-modern">Papel</h3>
+                <p class="category-description">Periódicos, cartón, revistas y documentos. Cada tonelada reciclada salva 17 árboles adultos.</p>
+                <div class="category-benefits">
+                  <span class="benefit-tag nature">🌳 Ecológico</span>
+                  <span class="benefit-tag versatile">📰 Versátil</span>
+                </div>
+                <button onclick="window.location.href='{% url 'registrate' %}'" class="btn-reciclar-modern papel">
+                  <span class="btn-icon">🌿</span>
+                  <span class="btn-text">Comenzar a Reciclar</span>
+                  <div class="btn-ripple"></div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+<!-- Categoría Metales -->
+          <div class="col-lg-3 col-md-6">
+            <div class="categoria-card-modern metales-card">
+              <div class="card-header-gradient metales-gradient">
+                <div class="category-badge-modern premium">
+                  <i class="fas fa-crown"></i>
+                  <span>Máximo Valor</span>
+                </div>
+                <div class="category-icon-modern">
+                  <i class="fas fa-cogs"></i>
+                </div>
+              </div>
+              <div class="category-visual">
+                <div class="background-pattern metales-pattern"></div>
+                <video autoplay muted loop class="category-video">
+                  <source src="{% static 'core/media/metales.mp4' %}" type="video/mp4">
+                  <img src="{% static 'core/img/metales.jpg' %}" alt="Reciclaje de Metales" loading="lazy">
+                </video>
+                <div class="stats-overlay">
+                  <div class="stat-circle premium">
+                    <span class="stat-number">20</span>
+                    <span class="stat-label">pts/kg</span>
+                  </div>
+                  <div class="impact-badge-modern maximum">
+                    Impacto Máximo
+                  </div>
+                </div>
+              </div>
+              <div class="category-info">
+                <h3 class="category-title-modern">Metales</h3>
+                <p class="category-description">Aluminio, cobre y hierro. El reciclaje de metales reduce la minería hasta en 95% y genera máximas ganancias.</p>
+                <div class="category-benefits">
+                  <span class="benefit-tag valuable">💎 Valioso</span>
+                  <span class="benefit-tag efficient">⚡ Eficiente</span>
+                </div>
+                <button onclick="window.location.href='{% url 'registrate' %}'" class="btn-reciclar-modern metales">
+                  <span class="btn-icon">👑</span>
+                  <span class="btn-text">Comenzar a Reciclar</span>
+                  <div class="btn-ripple"></div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información adicional y estadísticas -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <div class="categories-summary">
+              <div class="row text-center">
+                <div class="col-md-4 mb-3">
+                  <div class="summary-item">
+                    <div class="summary-icon">
+                      <i class="fas fa-coins"></i>
+                    </div>
+                    <h4>Ganancias Promedio</h4>
+                    <p class="summary-value">$50,000 COP/mes</p>
+                    <p class="summary-desc">Con 50kg de material mixto</p>
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <div class="summary-item">
+                    <div class="summary-icon">
+                      <i class="fas fa-leaf"></i>
+                    </div>
+                    <h4>Impacto Ambiental</h4>
+                    <p class="summary-value">-15kg COP</p>
+                    <p class="summary-desc">Reducción por cada reciclaje</p>
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <div class="summary-item">
+                    <div class="summary-icon">
+                      <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Comunidad Activa</h4>
+                    <p class="summary-value">{{ estadisticas.usuarios_activos }}</p>
+                    <p class="summary-desc">Recicladores Activos</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Call to action mejorado -->
+        <div class="text-center">
+          <div class="cta-container">
+            <h3 style="color: #ffffff; font-weight: 700; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+              ¿Listo para convertir tus residuos en dinero?
+            </h3>
+            <p style="color: #e8f5e8; margin-bottom: 30px; font-size: 1.1rem;">
+              Únete a miles de personas que ya están generando ingresos mientras cuidan el planeta
+            </p>
+            <div class="cta-buttons">
+              <a href="{% url 'categorias' %}" class="btn btn-light btn-lg me-3" style="border-radius: 30px; padding: 15px 30px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <i class="fas fa-search me-2"></i>Ver Todas las Categorías
+              </a>
+              <a href="{% url 'registrate' %}" class="btn btn-warning btn-lg" style="border-radius: 30px; padding: 15px 30px; font-weight: 600; box-shadow: 0 4px 15px rgba(255,193,7,0.4);">
+                <i class="fas fa-rocket me-2"></i>Empezar Ahora
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Estilos para la nueva sección de categorías -->
+    <link href="{% static 'core/css/categories-modern.css' %}" rel="stylesheet">
+
+    <!-- Sección de Impacto Ambiental -->
+<section id="impacto" class="py-4 py-md-5" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 252, 248, 0.98)); backdrop-filter: blur(15px); border-radius: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.25); margin: 20px 10px; position: relative; z-index: 10; border: 2px solid rgba(76, 175, 80, 0.3);">
+  <div class="container">
+    <div class="section-header text-center mb-4 mb-md-5">
+      <span class="badge px-3 py-2 mb-3" style="font-size: 1rem; font-weight: 700; background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); border-radius: 25px;">Nuestro Impacto</span>
+      <h2 class="impact-title" style="color: #1b5e20; font-weight: 800; font-size: clamp(1.8rem, 4vw, 2.5rem); text-shadow: 3px 3px 6px rgba(0,0,0,0.2); margin-bottom: 15px;">Juntos Por Un Mundo Mejor</h2>
+      <div class="divider mx-auto my-3" style="width: 100px; height: 5px; background: linear-gradient(90deg, #2e7d32, #4caf50, #81c784); border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+    </div>
+    <div class="impact-counter-container mb-4 mb-md-5">
+      <div class="row text-center g-3">
+        <div class="col-6 col-md-3 mb-3 mb-md-4">
+          <div class="impact-counter shadow-lg rounded-4 p-3 p-md-4" style="background: linear-gradient(135deg, #2e7d32, #4caf50, #66bb6a); border: 4px solid rgba(255,255,255,0.4); transform: translateY(0); transition: all 0.3s ease; min-height: 160px; display: flex; flex-direction: column; justify-content: center;">
+            <div class="counter-icon mb-2 mb-md-3" style="font-size: clamp(2rem, 5vw, 3rem); color:#ffffff; text-shadow: 3px 3px 6px rgba(0,0,0,0.5);">
+              <i class="fas fa-tree"></i>
+            </div>
+            <div class="counter-number fw-bold" data-target="{{ impacto.arboles_salvados }}" style="font-size: clamp(1.8rem, 4vw, 2.5rem); color:#ffffff; text-shadow: 3px 3px 6px rgba(0,0,0,0.5); line-height: 1;">0</div>
+            <div class="counter-label" style="color:#ffffff; font-weight: 700; font-size: clamp(0.9rem, 2.5vw, 1.1rem); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-top: 8px;">Írboles Salvados</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3 mb-md-4">
+          <div class="impact-counter shadow-lg rounded-4 p-3 p-md-4" style="background: linear-gradient(135deg, #2e7d32, #4caf50, #66bb6a); border: 4px solid rgba(255,255,255,0.4); transform: translateY(0); transition: all 0.3s ease; min-height: 160px; display: flex; flex-direction: column; justify-content: center;">
+            <div class="counter-icon mb-2 mb-md-3" style="font-size: clamp(2rem, 5vw, 3rem); color:#ffffff; text-shadow: 3px 3px 6px rgba(0,0,0,0.5);">
+              <i class="fas fa-recycle"></i>
+            </div>
+            <div class="counter-number fw-bold" data-target="{{ impacto.metales_reciclados }}" style="font-size: clamp(1.8rem, 4vw, 2.5rem); color:#ffffff; text-shadow: 3px 3px 6px rgba(0,0,0,0.5); line-height: 1;">0</div>
+            <div class="counter-label" style="color:#ffffff; font-weight: 700; font-size: clamp(0.9rem, 2.5vw, 1.1rem); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-top: 8px;">Metales Reciclados (kg)</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3 mb-md-4">
+          <div class="impact-counter shadow-lg rounded-4 p-3 p-md-4" style="background: linear-gradient(135deg, #2e7d32, #4caf50, #66bb6a); border: 4px solid rgba(255,255,255,0.4); transform: translateY(0); transition: all 0.3s ease; min-height: 160px; display: flex; flex-direction: column; justify-content: center;">
+            <div class="counter-icon mb-2 mb-md-3" style="font-size: clamp(2rem, 5vw, 3rem); color:#ffffff; text-shadow: 3px 3px 6px rgba(0,0,0,0.5);">
+              <i class="fas fa-leaf"></i>
+            </div>
+            <div class="counter-number fw-bold" data-target="{{ impacto.plasticos_reciclados }}" style="font-size: clamp(1.8rem, 4vw, 2.5rem); color:#ffffff; text-shadow: 3px 3px 6px rgba(0,0,0,0.5); line-height: 1;">0</div>
+            <div class="counter-label" style="color:#ffffff; font-weight: 700; font-size: clamp(0.9rem, 2.5vw, 1.1rem); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-top: 8px;">Plásticos Reciclados (kg)</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3 mb-md-4">
+          <div class="impact-counter shadow-lg rounded-4 p-3 p-md-4" style="background: linear-gradient(135deg, #2e7d32, #4caf50, #66bb6a); border: 4px solid rgba(255,255,255,0.4); transform: translateY(0); transition: all 0.3s ease; min-height: 160px; display: flex; flex-direction: column; justify-content: center;">
+            <div class="counter-icon mb-2 mb-md-3" style="font-size: clamp(2rem, 5vw, 3rem); color:#ffffff; text-shadow: 3px 3px 6px rgba(0,0,0,0.5);">
+              <i class="fas fa-glass-martini-alt"></i>
+            </div>
+            <div class="counter-number fw-bold" data-target="{{ impacto.vidrio_reciclado }}" style="font-size: clamp(1.8rem, 4vw, 2.5rem); color:#ffffff; text-shadow: 3px 3px 6px rgba(0,0,0,0.5); line-height: 1;">0</div>
+            <div class="counter-label" style="color:#ffffff; font-weight: 700; font-size: clamp(0.9rem, 2.5vw, 1.1rem); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-top: 8px;">Vidrio Reciclado (kg)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  
+          <!-- Sección Llamativa de Registro -->
+          <div class="eco-particles" id="eco-particles"></div>
+          <div class="rewards-container">
+            <div class="row align-items-center">
+              <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="rewards-content">
+                  <div class="rewards-badge">
+                    <span class="pulse-animation">🌱</span> ¡Únete Ahora!
+                  </div>
+                  <h2 class="rewards-title">¡Gana Mientras Salvas el Planeta! 🌍</h2>
+                  <div class="rewards-features">
+                    <div class="feature-item">
+                      <div class="feature-icon">
+                        <i class="fas fa-gift"></i>
+                      </div>
+                      <div class="feature-text">
+                        <h4>Puntos por Reciclar</h4>
+                        <p>Cada material reciclado te da puntos canjeables</p>
+                      </div>
+                    </div>
+                    <div class="feature-item">
+                      <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
+                      </div>
+                      <div class="feature-text">
+                        <h4>Premios Exclusivos</h4>
+                        <p>Desbloquea recompensas especiales</p>
+                      </div>
+                    </div>
+                    <div class="feature-item">
+                      <div class="feature-icon">
+                        <i class="fas fa-star"></i>
+                      </div>
+                      <div class="feature-text">
+                        <h4>Nivel ECO</h4>
+                        <p>¡Sube de nivel y obtén beneficios extra!</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="rewards-cta">
+                    <a href="{% url 'registrate' %}" class="btn-register-now">¡Regístrate y Gana! <i class="fas fa-arrow-right"></i></a>
+                    <div class="users-count">
+                      <div class="users-avatars">
+                        <span class="avatar">🏆</span>
+                        <span class="avatar">👤</span>
+                        <span class="avatar">🌿</span>
+                      </div>
+                      <p>{{ estadisticas.usuarios_activos }} personas ya están ganando</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="rewards-animation">
+                  <div class="floating-elements">
+                    <div class="eco-element bottle">♻️</div>
+                    <div class="eco-element paper">📍„</div>
+                    <div class="eco-element tree">🌳</div>
+                    <div class="eco-element coin coin-1">💰</div>
+                    <div class="eco-element coin coin-2">💰</div>
+                    <div class="points-popup">+50 puntos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+      </div>
+    </div>
+  </div>
+</section>
+<div class="container mt-5">
+      <div class="valor-banner">
+        <div class="valor-content">
+          <div class="valor-icon">
+            <i class="fas fa-hand-holding-heart"></i>
+          </div>
+          <h2 style="color: #000000;">¡Valoramos tu contribución!</h2>
+          <p style="color: #000000;">Tu contribución es fundamental para nuestro proyecto. ¡Únete a nosotros y contribuye al cambio!</p>
+          <a href="#" class="btn btn-valor" style="color: #000000;" data-bs-toggle="modal" data-bs-target="#donationModal">¡Contribuye ahora!</a>
+        </div>
+        <div class="valor-decoration">
+          <div class="decoration-circle circle-1"></div>
+          <div class="decoration-circle circle-2"></div>
+          <div class="decoration-circle circle-3"></div>
+        </div>
+      </div>
+    </div>
+    
+    
+  
+  <!-- Footer Rediseñado -->
+  <footer class="footer-redesign">
+  
+    <div class="footer-wave">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+      </svg>
+    </div>
+  
+    <div class="footer-content">
+      <div class="container">
+        <div class="row justify-content-center g-4">
+          <!-- Columna 1: Logo y descripción -->
+          <div class="col-lg-3 col-md-6 text-center">
+            <div class="footer-brand mb-4">
+              <img src="{% static 'core/img/eco.jpg' %}" alt="Logo Eco Puntos" class="footer-logo mb-3">
+              <h3 class="mb-0">Eco Puntos</h3>
+            </div>
+            <p class="footer-description mb-4">Transformamos el reciclaje en recompensas, creando un futuro más sostenible para todos.</p>
+            <div class="footer-social justify-content-center">
+              <a href="https://www.facebook.com/124172968223072" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+              <a href="https://twitter.com/SENA_Tolima/status/1541889419942174726" class="social-icon"><i class="fab fa-twitter"></i></a>
+              <a href="https://www.instagram.com/explore/locations/124172968223072/sena-centro-de-industria-y-la-construccion/" class="social-icon"><i class="fab fa-instagram"></i></a>
+              <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+          
+          <!-- Columna 2: Enlaces rápidos -->
+          <div class="col-lg-2 col-md-6 text-center">
+            <h5 class="footer-heading mb-4">Enlaces Rápidos</h5>
+            <ul class="footer-links list-unstyled m-0">
+              <li><a href="#hero">Inicio</a></li>
+              <li><a href="#nosotros">Quiénes Somos</a></li>
+              <li><a href="#categorias">Categorías</a></li>
+              <li><a href="#como-funciona">Como Funciona?</a></li>
+            </ul>
+          </div>
+          
+          <!-- Columna 3: Categorías -->
+          <div class="col-lg-2 col-md-6 text-center">
+            <h5 class="footer-heading mb-4">Categorías</h5>
+            <ul class="footer-links list-unstyled m-0">
+              <li><a href="{% url 'categorias' %}">Plásticos</a></li>
+              <li><a href="{% url 'categorias' %}">Vidrio</a></li>
+              <li><a href="{% url 'categorias' %}">Papel</a></li>
+              <li><a href="{% url 'categorias' %}">Metales</a></li>
+            </ul>
+          </div>
+          
+          <!-- Columna 4: Contacto -->
+          <div class="col-lg-3 col-md-6 text-center">
+            <h5 class="footer-heading mb-4">Contacto</h5>
+            <ul class="footer-contact list-unstyled m-0">
+              <li>
+                <i class="fas fa-map-marker-alt contact-icon"></i>
+                <span>Centro de Industria y Construcción SENA</span>
+              </li>
+              <li>
+                <i class="fas fa-phone contact-icon"></i>
+                <span>(+57) 324 960 5589</span>
+              </li>
+              <li>
+                <i class="fas fa-envelope contact-icon"></i>
+                <span>info@ecopuntos.com</span>
+              </li>
+              <li>
+                <i class="fas fa-clock contact-icon"></i>
+                <span>Lun - Vie: 8:00 AM - 5:00 PM</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="row">
+          <div class="col-12 text-center">
+            <p class="copyright mb-2">© 2025 Eco Puntos. Todos los derechos reservados.</p>
+            <div class="footer-legal">
+                <a href="{% url 'politica_privacidad' %}">Políticas de privacidad</a>
+              <span class="separator">|</span>
+              <a href="{% url 'terminos_condiciones' %}">Términos de uso</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </footer>
+
+<!-- Script de optimización para videos de categorías -->
+
+
+<!-- JavaScript para el Modal de Donación -->
+
+
+
+<!-- Modal de Donación -->
+<div class="modal fade" id="donationModal" tabindex="-1" aria-labelledby="donationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.1);">
+      <div class="modal-header" style="background: linear-gradient(135deg, #4caf50, #66bb6a); color: white; border-bottom: none; border-radius: 20px 20px 0 0;">
+        <div class="text-center w-100">
+          <h4 class="modal-title" id="donationModalLabel" style="font-weight: 700; margin: 0;">
+            <i class="fas fa-heart text-white me-2"></i>
+            Contribuye a EcoPuntos
+          </h4>
+          <p class="mb-0 mt-2" style="opacity: 0.9;">Tu aporte hace la diferencia en el cuidado del planeta</p>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body" style="padding: 30px;">
+        <form id="donationForm">
+          <!-- Opciones de Donación -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <h5 class="text-center mb-3" style="color: #4caf50; font-weight: 600;">Selecciona tu tipo de contribución</h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="donation-option" data-type="monetary">
+                    <div class="card h-100 text-center" style="border: 2px solid #e0e0e0; border-radius: 15px; cursor: pointer; transition: all 0.3s ease;">
+                      <div class="card-body">
+                        <i class="fas fa-dollar-sign fa-2x text-success mb-3"></i>
+                        <h6 style="color: #4caf50; font-weight: 600;">Donación Monetaria</h6>
+                        <p class="text-muted small">Apoya económicamente nuestros proyectos</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="donation-option" data-type="volunteer">
+                    <div class="card h-100 text-center" style="border: 2px solid #e0e0e0; border-radius: 15px; cursor: pointer; transition: all 0.3s ease;">
+                      <div class="card-body">
+                        <i class="fas fa-hands-helping fa-2x text-success mb-3"></i>
+                        <h6 style="color: #4caf50; font-weight: 600;">Ser Voluntario</h6>
+                        <p class="text-muted small">Únete a nuestro equipo de voluntarios</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulario de Donación Monetaria -->
+          <div id="monetaryForm" style="display: none;">
+            <h6 class="mb-3" style="color: #4caf50;">💰 Donación Monetaria</h6>
+            
+            <!-- Montos predefinidos -->
+            <div class="row mb-3">
+              <div class="col-12">
+                <label class="form-label" style="font-weight: 600;">Selecciona un monto:</label>
+                <div class="row g-2">
+                  <div class="col-4">
+                    <button type="button" class="btn btn-outline-success w-100 amount-btn" data-amount="10">$10</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-outline-success w-100 amount-btn" data-amount="25">$25</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-outline-success w-100 amount-btn" data-amount="50">$50</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-outline-success w-100 amount-btn" data-amount="100">$100</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-outline-success w-100 amount-btn" data-amount="250">$250</button>
+                  </div>
+                  <div class="col-4">
+                    <input type="number" class="form-control" id="customAmount" placeholder="Otro" min="1">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Información del donante -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="donorName" class="form-label">Nombre completo</label>
+                <input type="text" class="form-control" id="donorName" required>
+              </div>
+              <div class="col-md-6">
+                <label for="donorEmail" class="form-label">Correo electrónico</label>
+                <input type="email" class="form-control" id="donorEmail" required>
+              </div>
+            </div>
+
+            <!-- Método de pago -->
+            <div class="mb-3">
+              <label class="form-label" style="font-weight: 600;">Método de pago:</label>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" value="credit" checked>
+                    <label class="form-check-label" for="creditCard">
+                      <i class="fas fa-credit-card text-primary"></i> Tarjeta
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="paypal" value="paypal">
+                    <label class="form-check-label" for="paypal">
+                      <i class="fab fa-paypal text-info"></i> PayPal
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="bankTransfer" value="transfer">
+                    <label class="form-check-label" for="bankTransfer">
+                      <i class="fas fa-university text-warning"></i> Transferencia
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mensaje opcional -->
+            <div class="mb-3">
+              <label for="donationMessage" class="form-label">Mensaje (opcional)</label>
+              <textarea class="form-control" id="donationMessage" rows="3" placeholder="¿Quieres dejar algún mensaje sobre tu donación?"></textarea>
+            </div>
+          </div>
+
+          <!-- Formulario de Voluntariado -->
+          <div id="volunteerForm" style="display: none;">
+            <h6 class="mb-3" style="color: #4caf50;">🤝 Únete como Voluntario</h6>
+            
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="volunteerName" class="form-label">Nombre completo</label>
+                <input type="text" class="form-control" id="volunteerName" required>
+              </div>
+              <div class="col-md-6">
+                <label for="volunteerEmail" class="form-label">Correo electrónico</label>
+                <input type="email" class="form-control" id="volunteerEmail" required>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="volunteerPhone" class="form-label">Teléfono</label>
+                <input type="tel" class="form-control" id="volunteerPhone">
+              </div>
+              <div class="col-md-6">
+                <label for="volunteerAge" class="form-label">Edad</label>
+                <input type="number" class="form-control" id="volunteerAge" min="16" max="100">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="volunteerAreas" class="form-label">Íreas de interés (selecciona todas las que te interesen)</label>
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="area1" value="recoleccion">
+                    <label class="form-check-label" for="area1">Recolección de materiales</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="area2" value="educacion">
+                    <label class="form-check-label" for="area2">Educación ambiental</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="area3" value="eventos">
+                    <label class="form-check-label" for="area3">Organización de eventos</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="area4" value="tecnologia">
+                    <label class="form-check-label" for="area4">Soporte técnico</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="area5" value="promocion">
+                    <label class="form-check-label" for="area5">Promoción y marketing</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="area6" value="administracion">
+                    <label class="form-check-label" for="area6">Tareas administrativas</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="volunteerAvailability" class="form-label">Disponibilidad</label>
+              <select class="form-select" id="volunteerAvailability">
+                <option value="">Selecciona tu disponibilidad</option>
+                <option value="weekends">Fines de semana</option>
+                <option value="weekdays">Entre semana</option>
+                <option value="evenings">Noches</option>
+                <option value="flexible">Horario flexible</option>
+                <option value="specific">Horario específico (especificar en mensaje)</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="volunteerExperience" class="form-label">Experiencia previa (opcional)</label>
+              <textarea class="form-control" id="volunteerExperience" rows="3" placeholder="Cuéntanos sobre tu experiencia en voluntariado o temas ambientales..."></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="volunteerMotivation" class="form-label">¿Por qué quieres ser voluntario en EcoPuntos?</label>
+              <textarea class="form-control" id="volunteerMotivation" rows="3" placeholder="Comparte tu motivación..."></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer" style="border-top: 1px solid #e0e0e0; padding: 20px 30px;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 25px;">Cancelar</button>
+        <button type="button" class="btn btn-success" id="submitContribution" style="border-radius: 25px; font-weight: 600;">
+          <i class="fas fa-heart me-2"></i>Enviar Contribución
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Scripts Modulares -->
+  <script src="{% static 'core/js/navigation.js' %}?v=2.0"></script>
+  <script src="{% static 'core/js/videos.js' %}"></script>
+  <script src="{% static 'core/js/modal.js' %}"></script>
+
+  <!-- Incluir botón PWA (componente) -->
+  {% include 'core/components/pwa_install_button.html' %}
+
+  <!-- Registrar Service Worker para la PWA (index público) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('SW registrado desde index:', reg.scope))
+          .catch(err => console.warn('SW registration failed (index):', err));
+      });
+    }
+  </script>
+
+</body>
+</html>
+

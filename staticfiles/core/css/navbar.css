@@ -1,0 +1,287 @@
+/* ========================================
+   NAVBAR - Estilos de Barra de Navegación
+   ======================================== */
+
+/* Estilos para la barra de navegación moderna */
+.navbar-eco {
+  background-color: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 4px 20px rgba(255, 254, 254, 0.05);
+  padding: 15px 0;
+  transition: all 0.3s ease;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-eco.scrolled {
+  padding: 10px 0;
+  background-color: rgba(255, 253, 253, 0.664);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand-eco {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-eco {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.navbar-eco.scrolled .logo-eco {
+  width: 40px;
+  height: 40px;
+}
+
+.brand-text {
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: #4caf50;
+  margin: 0;
+  transition: all 0.3s ease;
+}
+
+.navbar-eco.scrolled .brand-text {
+  font-size: 1.4rem;
+}
+
+.nav-link-eco {
+  color: #333;
+  font-weight: 500;
+  padding: 8px 16px !important;
+  margin: 0 5px;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link-eco:hover {
+  color: #4caf50;
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.nav-link-eco.active {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.nav-link-eco.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #4caf50;
+  border-radius: 50%;
+}
+
+.btn-login {
+  background-color: transparent;
+  color: #4caf50;
+  border: 2px solid #4caf50;
+  border-radius: 30px;
+  padding: 8px 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.dropdown-item {
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+  transform: translateX(5px);
+}
+
+.dropdown-menu {
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  min-width: 250px;
+}
+
+.dropdown-divider {
+  margin: 0.5rem 0;
+  border-color: rgba(76, 175, 80, 0.1);
+}
+
+.btn-login.dropdown-toggle::after {
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  transition: transform 0.3s ease;
+}
+
+.btn-login.dropdown-toggle[aria-expanded="true"]::after {
+  transform: rotate(180deg);
+}
+
+.btn-register {
+  background-color: #4caf50;
+  color: white;
+  border: 2px solid #4caf50;
+  border-radius: 30px;
+  padding: 8px 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
+}
+
+.btn-register:hover {
+  background-color: #388e3c;
+  border-color: #388e3c;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3);
+}
+
+.navbar-toggler-eco {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.navbar-toggler-icon-eco {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.navbar-toggler-icon-eco span {
+  display: block;
+  position: absolute;
+  height: 3px;
+  width: 100%;
+  background: #4caf50;
+  border-radius: 10px;
+  opacity: 1;
+  left: 0;
+  transform: rotate(0deg);
+  transition: all 0.3s ease;
+}
+
+.navbar-toggler-icon-eco span:nth-child(1) {
+  top: 6px;
+}
+
+.navbar-toggler-icon-eco span:nth-child(2) {
+  top: 16px;
+}
+
+.navbar-toggler-icon-eco span:nth-child(3) {
+  top: 26px;
+}
+
+.navbar-toggler-eco[aria-expanded="true"] .navbar-toggler-icon-eco span:nth-child(1) {
+  top: 16px;
+  transform: rotate(135deg);
+}
+
+.navbar-toggler-eco[aria-expanded="true"] .navbar-toggler-icon-eco span:nth-child(2) {
+  opacity: 0;
+  left: -60px;
+}
+
+.navbar-toggler-eco[aria-expanded="true"] .navbar-toggler-icon-eco span:nth-child(3) {
+  top: 16px;
+  transform: rotate(-135deg);
+}
+
+/* Animación para los elementos del menú */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-item-eco {
+  animation: fadeInDown 0.5s ease forwards;
+  opacity: 0;
+}
+
+.nav-item-eco:nth-child(1) { animation-delay: 0.1s; }
+.nav-item-eco:nth-child(2) { animation-delay: 0.2s; }
+.nav-item-eco:nth-child(3) { animation-delay: 0.3s; }
+.nav-item-eco:nth-child(4) { animation-delay: 0.4s; }
+
+/* ========================================
+   RESPONSIVE - Móvil
+   ======================================== */
+
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 15px;
+  }
+  
+  .nav-link-eco {
+    padding: 15px 20px !important;
+    margin: 5px 0;
+    font-size: 1.1rem;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .nav-link-eco.active::after {
+    display: none;
+  }
+  
+  .nav-link-eco.active {
+    background-color: rgba(76, 175, 80, 0.15);
+    font-weight: 700;
+  }
+  
+  .navbar-buttons {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .btn-login, .btn-register {
+    width: 100%;
+    text-align: center;
+    min-height: 50px;
+    font-size: 1.1rem;
+    padding: 12px 25px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .brand-text {
+    font-size: 1.3rem !important;
+  }
+  
+  .logo-eco {
+    width: 38px !important;
+    height: 38px !important;
+  }
+  
+  .navbar-eco {
+    padding: 12px 0;
+  }
+}

@@ -1,0 +1,216 @@
+<!-- Botón flotante para instalar PWA -->
+<style>
+  .pwa-install-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 15px 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+    display: none;
+    align-items: center;
+    gap: 10px;
+    z-index: 9998;
+    transition: all 0.3s ease;
+    animation: slideInUp 0.5s ease-out;
+  }
+  
+  .pwa-install-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(76, 175, 80, 0.6);
+  }
+  
+  .pwa-install-btn.show {
+    display: flex;
+  }
+  
+  .pwa-install-btn i {
+    font-size: 20px;
+  }
+  
+  @keyframes slideInUp {
+    from {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .pwa-install-btn {
+      bottom: 90px;
+      right: 15px;
+      padding: 12px 20px;
+      font-size: 14px;
+    }
+  }
+</style>
+
+<button id="pwaInstallBtn" class="pwa-install-btn">
+  <i class="fas fa-download"></i>
+  <span>Instalar App</span>
+</button>
+
+<!-- Overlay instructivo iOS -->
+<div id="iosInstallOverlay" style="display:none; position:fixed; top:40px; right:14px; z-index:10001; pointer-events:none;">
+  <div style="background: rgba(255,255,255,0.98); padding:12px 14px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.18); max-width:260px; font-size:14px; color:#223; pointer-events:auto;">
+    <div style="font-weight:700; margin-bottom:6px;">Instalar EcoPuntos</div>
+    <div style="font-size:13px; margin-bottom:8px; color:#444;">Pulse <strong>Compartir</strong> (icono ▣↑) y luego <strong>Agregar a pantalla de inicio</strong>.</div>
+    <div style="text-align:right;">
+      <button id="iosOverlayClose" class="btn btn-sm btn-outline-secondary">Entendido</button>
+    </div>
+  </div>
+  <svg width="48" height="48" viewBox="0 0 24 24" style="position:absolute; right:-10px; top:52px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">
+    <path d="M12 2v10" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+    <path d="M5 9l7-7 7 7" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+    <circle cx="12" cy="18" r="3" stroke="#4CAF50" stroke-width="2" fill="rgba(76,175,80,0.08)"/>
+  </svg>
+</div>
+
+<script>
+  // Manejar instalación de PWA
+  (function() {
+    let deferredPrompt = null;
+    const installBtn = document.getElementById('pwaInstallBtn');
+    const isiOS = /iP(hone|od|ad)/.test(navigator.userAgent);
+
+    function showInstallButton() {
+      if (installBtn) installBtn.classList.add('show');
+    }
+
+    function hideInstallButton() {
+      if (installBtn) installBtn.classList.remove('show');
+    }
+
+    // Si otro script guardó el evento en window.deferredPrompt, úsalo
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.deferredPrompt) {
+        deferredPrompt = window.deferredPrompt;
+        showInstallButton();
+      }
+      // Si ya estamos en modo standalone, ocultar
+      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+        hideInstallButton();
+      }
+      // Si es iOS y no estamos en standalone, mostrar botón con instrucciones
+      if (isiOS && !window.matchMedia('(display-mode: standalone)').matches) {
+        showInstallButton();
+      }
+    });
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Guardar también en window para accesos desde otros scripts
+      window.deferredPrompt = e;
+      showInstallButton();
+    });
+
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        // iOS no dispara beforeinstallprompt; mostrar instrucciones
+        if (isiOS && !deferredPrompt) {
+          // Mostrar modal con pasos para iOS: Share -> Add to Home Screen
+          const existing = document.getElementById('iosInstallModal');
+          if (!existing) {
+            const modalHtml = `
+              <div class="modal fade" id="iosInstallModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Instalar EcoPuntos</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                      <p>Para instalar la app en iPhone/iPad:</p>
+                      <ol class="text-start">
+                        <li>Toque el botón <strong>Compartir</strong> (icono cuadrado con una flecha hacia arriba).</li>
+                        <li>Seleccione <strong>Agregar a pantalla de inicio</strong>.</li>
+                        <li>Confirme y aparecerá el icono en su pantalla de inicio.</li>
+                      </ol>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+          }
+          const modalEl = document.getElementById('iosInstallModal');
+          if (modalEl && typeof bootstrap !== 'undefined') {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+          } else {
+            alert('Para instalar: pulse Compartir → Agregar a pantalla de inicio');
+          }
+          return;
+        }
+
+        if (!deferredPrompt) return;
+
+        try {
+          deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
+          if (choice && choice.outcome === 'accepted') {
+            console.log('✓ Usuario aceptó instalar la PWA');
+          } else {
+            console.log('✗ Usuario rechazó instalar la PWA');
+          }
+        } catch (err) {
+          console.error('Error al mostrar prompt de instalación:', err);
+        }
+
+        deferredPrompt = null;
+        window.deferredPrompt = null;
+        hideInstallButton();
+      });
+    }
+
+    // Mostrar overlay instructivo para iOS como ayuda visual
+    const iosOverlay = document.getElementById('iosInstallOverlay');
+    const iosOverlayClose = document.getElementById('iosOverlayClose');
+    function showIOSOverlay() {
+      if (!isiOS || !iosOverlay) return;
+      iosOverlay.style.display = 'block';
+      // Hacer que desaparezca solo después de 12s si el usuario no lo cierra
+      setTimeout(() => { if (iosOverlay) iosOverlay.style.display = 'none'; }, 12000);
+    }
+    if (iosOverlayClose) {
+      iosOverlayClose.addEventListener('click', function(e){
+        e.preventDefault();
+        if (iosOverlay) iosOverlay.style.display = 'none';
+      });
+    }
+
+    // Mostrar overlay automáticamente en iOS al cargar si no estamos en standalone
+    document.addEventListener('DOMContentLoaded', function(){
+      try{
+        if (isiOS && !window.matchMedia('(display-mode: standalone)').matches) {
+          // breve delay para que el usuario vea la UI
+          setTimeout(showIOSOverlay, 900);
+        }
+      }catch(err){ console && console.warn && console.warn('ios overlay error', err); }
+    });
+
+    // Ocultar el botón si ya está instalada
+    window.addEventListener('appinstalled', () => {
+      console.log('✓ PWA instalada exitosamente');
+      deferredPrompt = null;
+      window.deferredPrompt = null;
+      hideInstallButton();
+      if (typeof toastr !== 'undefined') {
+        toastr.success('¡App instalada exitosamente!');
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,778 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Rutas de Recolección | Eco Puntos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/rutasusuario.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="container-fluid">
+        <!-- Encabezado de la sección -->
+        <div class="section-header-container">
+            <div class="section-header fade-in">
+                <h2>
+                    <i class="fas fa-route me-3"></i>Sistema de Rutas de Recolección
+                </h2>
+                <p>Gestiona tus canjes con recolección domiciliaria y agenda nuevos servicios</p>
+            </div>
+        </div>
+
+        <!-- Navegación por tabs -->
+        <div class="content-wrapper">
+            <ul class="nav nav-tabs mb-4" id="rutasTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active modern-tab" id="mis-canjes-recoleccion-tab" 
+                            data-bs-toggle="tab" data-bs-target="#mis-canjes-recoleccion" 
+                            type="button" role="tab">
+                        <i class="fas fa-box-open me-2"></i>Mis Canjes con Recolección
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link modern-tab" id="agendar-ruta-tab" 
+                            data-bs-toggle="tab" data-bs-target="#agendar-ruta" 
+                            type="button" role="tab">
+                        <i class="fas fa-calendar-plus me-2"></i>Solicitar Nueva Recolección
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link modern-tab" id="historial-rutas-tab" 
+                            data-bs-toggle="tab" data-bs-target="#historial-rutas" 
+                            type="button" role="tab">
+                        <i class="fas fa-history me-2"></i>Historial de Rutas
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="rutasTabContent">
+                <!-- ============================================
+                     TAB 1: MIS CANJES CON RECOLECCIÓN
+                     ============================================ -->
+                <div class="tab-pane fade show active" id="mis-canjes-recoleccion" role="tabpanel">
+                    {% if user_canjes_recoleccion %}
+                    <div class="row g-4">
+                        {% for canje_data in user_canjes_recoleccion %}
+                        <div class="col-12 col-md-6 col-xl-4 d-flex">
+                            <div class="card-canje-ruta h-100">
+                                <div class="card-header-custom">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0 fw-bold">
+                                            <i class="fas fa-leaf me-2 text-success"></i>
+                                            {{ canje_data.canje.material.nombre }}
+                                        </h6>
+                                        <span class="estado-badge estado-{{ canje_data.canje.estado }}">
+                                            {{ canje_data.canje.get_estado_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-body-custom">
+                                    <div class="info-grid">
+                                        <div class="info-item">
+                                            <i class="fas fa-weight-hanging text-primary"></i>
+                                            <span class="info-label">Peso:</span>
+                                            <span class="info-value">{{ canje_data.canje.peso }} kg</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="fas fa-coins text-warning"></i>
+                                            <span class="info-label">Puntos:</span>
+                                            <span class="info-value">{{ canje_data.canje.puntos }}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="fas fa-calendar text-info"></i>
+                                            <span class="info-label">Solicitud:</span>
+                                            <span class="info-value">{{ canje_data.canje.fecha_solicitud|date:"d/m/Y" }}</span>
+                                        </div>
+                                    </div>
+
+                                    {% if canje_data.canje.direccion_recoleccion %}
+                                    <div class="direccion-info">
+                                        <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                        <span>{{ canje_data.canje.direccion_recoleccion|truncatechars:40 }}</span>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if canje_data.canje.telefono_contacto %}
+                                    <div class="contacto-info">
+                                        <i class="fas fa-phone text-success me-2"></i>
+                                        <span>{{ canje_data.canje.telefono_contacto }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="card-footer-custom">
+                                    {% if canje_data.ruta_info %}
+                                    <div class="ruta-status">
+                                        <div class="ruta-info-header">
+                                            <i class="fas fa-truck text-primary me-2"></i>
+                                            <strong>{{ canje_data.ruta_info.nombre }}</strong>
+                                        </div>
+                                        <div class="ruta-details">
+                                            <span class="ruta-estado badge bg-{{ canje_data.ruta_info.estado_color }}">
+                                                {{ canje_data.ruta_info.estado_display }}
+                                            </span>
+                                            {% if canje_data.ruta_info.fecha_programada %}
+                                            <div class="fecha-programada">
+                                                <i class="fas fa-clock me-1"></i>
+                                                {{ canje_data.ruta_info.fecha_programada|date:"d/m/Y H:i" }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% if canje_data.ruta_info.permite_reagendar or canje_data.ruta_info.permite_cancelar %}
+                                        <div class="botones-ruta mt-3 d-flex gap-2">
+                                            {% if canje_data.ruta_info.permite_reagendar %}
+                                            <button class="btn btn-sm btn-warning flex-grow-1" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalReagendarRutaUsuario"
+                                                    onclick="abrirModalReagendar({{ canje_data.ruta_info.id }}, '{{ canje_data.canje.material.nombre|escapejs }}', '{{ canje_data.ruta_info.fecha_programada|date:'Y-m-d' }}', '{{ canje_data.ruta_info.fecha_programada|date:'H:i' }}')">
+                                                <i class="fas fa-calendar-alt me-1"></i>Reagendar
+                                            </button>
+                                            {% endif %}
+                                            {% if canje_data.ruta_info.permite_cancelar %}
+                                            <button class="btn btn-sm btn-danger flex-grow-1" 
+                                                    onclick="confirmarCancelarRuta({{ canje_data.ruta_info.id }}, '{{ canje_data.canje.material.nombre|escapejs }}')">
+                                                <i class="fas fa-times me-1"></i>Cancelar
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <div class="sin-ruta">
+                                        <i class="fas fa-hourglass-half text-warning me-2"></i>
+                                        <span>Pendiente de asignación a ruta</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <h4>No tienes canjes con recolección</h4>
+                        <p>¡Solicita tu primer canje con recolección domiciliaria!</p>
+                        <a href="/canjes/" class="btn btn-success btn-lg">
+                            <i class="fas fa-plus me-2"></i>Solicitar Canje con Recolección
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- ============================================
+                     TAB 2: SOLICITAR NUEVA RECOLECCIÓN
+                     ============================================ -->
+                <div class="tab-pane fade" id="agendar-ruta" role="tabpanel">
+                    <div class="card-canje">
+                        <div class="form-header text-center mb-4">
+                            <h3>
+                                <i class="fas fa-calendar-plus me-3"></i>Solicitar Nueva Recolección
+                            </h3>
+                            <p class="text-muted">
+                                Agenda una recolección directa de materiales reciclables en tu domicilio
+                            </p>
+                        </div>
+
+                        <form method="POST" action="{% url 'agendar_ruta_usuario' %}" id="nuevaRecoleccionForm">
+                            {% csrf_token %}
+
+                            <!-- Paso 1: Dirección -->
+                            <div class="form-step active" id="step-1">
+                                <div class="step-header">
+                                    <div class="step-number">1</div>
+                                    <div class="step-info">
+                                        <h5>Información de Contacto</h5>
+                                        <p>Datos para la recolección</p>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="nombre_completo" class="form-label">Nombre Completo *</label>
+                                        <input type="text" class="form-control modern-input" 
+                                               id="nombre_completo" name="nombre_completo" 
+                                               value="{{ user.get_full_name }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email *</label>
+                                        <input type="email" class="form-control modern-input" 
+                                               id="email" name="email" 
+                                               value="{{ user_data.email }}" required>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="telefono" class="form-label">Teléfono *</label>
+                                        <input type="tel" class="form-control modern-input" 
+                                               id="telefono" name="telefono" 
+                                               value="{{ user_data.telefono }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Dirección de Recolección *</label>
+                                        <button type="button" class="btn btn-outline-success w-100" 
+                                                onclick="showDireccionModal()">
+                                            <i class="fas fa-map-marker-alt me-2"></i>Ingresar Dirección
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="step-actions">
+                                    <div></div>
+                                    <button type="button" class="btn btn-success btn-lg" onclick="nextStep(2)">
+                                        Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Paso 2: Selección de Canjes -->
+                            <div class="form-step" id="step-2">
+                                <div class="step-header">
+                                    <div class="step-number">2</div>
+                                    <div class="step-info">
+                                        <h5>Seleccionar Materiales</h5>
+                                        <p>Elige los canjes que quieres incluir en esta ruta</p>
+                                    </div>
+                                </div>
+
+                                {% if canjes_pendientes %}
+                                <div class="row">
+                                    {% for canje in canjes_pendientes %}
+                                    <div class="col-md-6 mb-3">
+                                        <div class="canje-card">
+                                            <div class="d-flex align-items-start">
+                                                <input type="checkbox" class="canje-checkbox me-3" 
+                                                       name="canjes[]" value="{{ canje.id }}">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-2">
+                                                        <i class="fas fa-leaf me-2 text-success"></i>
+                                                        {{ canje.material.nombre }}
+                                                    </h6>
+                                                    <p class="mb-1"><strong>Peso:</strong> {{ canje.peso }} kg</p>
+                                                    <p class="mb-1"><strong>Puntos:</strong> {{ canje.puntos }}</p>
+                                                    <p class="mb-0 text-muted">
+                                                        <small>Solicitado: {{ canje.fecha_solicitud|date:"d/m/Y" }}</small>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="selection-summary mt-4 p-3">
+                                    <h6><i class="fas fa-check-circle text-success me-2"></i>Resumen de Selección</h6>
+                                    <div id="selected-canjes-summary"></div>
+                                </div>
+                                {% else %}
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <i class="fas fa-inbox"></i>
+                                    </div>
+                                    <h4>No tienes canjes pendientes</h4>
+                                    <p>Para solicitar recolección, primero necesitas tener canjes pendientes.</p>
+                                    <a href="/canjes/" class="btn btn-success btn-lg">
+                                        <i class="fas fa-plus me-2"></i>Solicitar Canjes
+                                    </a>
+                                </div>
+                                {% endif %}
+
+                                <div class="step-actions">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="prevStep(1)">
+                                        <i class="fas fa-arrow-left me-2"></i>Anterior
+                                    </button>
+                                    <button type="button" class="btn btn-success btn-lg" onclick="nextStep(3)">
+                                        Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Paso 3: Fecha y Hora -->
+                            <div class="form-step" id="step-3">
+                                <div class="step-header">
+                                    <div class="step-number">3</div>
+                                    <div class="step-info">
+                                        <h5>Programación</h5>
+                                        <p>Elige la fecha y hora más conveniente</p>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fecha_preferida" class="form-label">Fecha Preferida *</label>
+                                        <input type="date" class="form-control modern-input" 
+                                               id="fecha_preferida" name="fecha_preferida" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="hora_preferida" class="form-label">Hora Preferida *</label>
+                                        <select class="form-control modern-input" 
+                                                id="hora_preferida" name="hora_preferida" required>
+                                            <option value="">Seleccionar hora</option>
+                                            <option value="08:00">08:00 AM</option>
+                                            <option value="09:00">09:00 AM</option>
+                                            <option value="10:00">10:00 AM</option>
+                                            <option value="11:00">11:00 AM</option>
+                                            <option value="12:00">12:00 PM</option>
+                                            <option value="13:00">01:00 PM</option>
+                                            <option value="14:00">02:00 PM</option>
+                                            <option value="15:00">03:00 PM</option>
+                                            <option value="16:00">04:00 PM</option>
+                                            <option value="17:00">05:00 PM</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="notas_adicionales" class="form-label">Notas Adicionales</label>
+                                    <textarea class="form-control modern-input" 
+                                              id="notas_adicionales" name="notas_adicionales" rows="3" 
+                                              placeholder="Información adicional para la recolección"></textarea>
+                                </div>
+
+                                <div class="step-actions">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="prevStep(2)">
+                                        <i class="fas fa-arrow-left me-2"></i>Anterior
+                                    </button>
+                                    <button type="button" class="btn btn-success btn-lg" onclick="nextStep(4)">
+                                        <i class="fas fa-arrow-right me-2"></i>Siguiente
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Paso 4: Confirmación -->
+                            <div class="form-step" id="step-4">
+                                <div class="step-header">
+                                    <div class="step-number">4</div>
+                                    <div class="step-info">
+                                        <h5>Detalles de Confirmación</h5>
+                                        <p>Revisa los detalles de tu solicitud antes de confirmar</p>
+                                    </div>
+                                </div>
+
+                                <!-- Resumen de Materiales -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-recycle text-success me-2"></i>Materiales Seleccionados
+                                    </h6>
+                                    <div id="resumen_materiales_paso4" class="p-3" style="background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                                        <!-- Se llenará con JavaScript -->
+                                    </div>
+                                </div>
+
+                                <!-- Dirección -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-map-marker-alt text-danger me-2"></i>Dirección de Recolección
+                                    </h6>
+                                    <div class="p-3" style="background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                                        <p id="resumen_direccion_paso4" class="mb-0"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Fecha y Hora -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-calendar-check text-primary me-2"></i>Programación
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="p-3" style="background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                                                <strong class="d-block mb-2 text-muted">Fecha:</strong>
+                                                <p id="resumen_fecha_paso4" class="mb-0 h5"></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="p-3" style="background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                                                <strong class="d-block mb-2 text-muted">Hora:</strong>
+                                                <p id="resumen_hora_paso4" class="mb-0 h5"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Notas -->
+                                <div id="resumen_notas_container_paso4" class="mb-4" style="display: none;">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-sticky-note text-warning me-2"></i>Notas Adicionales
+                                    </h6>
+                                    <div class="p-3" style="background: #fef3c7; border-radius: 10px; border: 1px solid #fde68a;">
+                                        <p id="resumen_notas_paso4" class="mb-0"></p>
+                                    </div>
+                                </div>
+
+                                <div class="step-actions">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="prevStep(3)">
+                                        <i class="fas fa-arrow-left me-2"></i>Anterior
+                                    </button>
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-paper-plane me-2"></i>Enviar Solicitud
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ============================================
+                     TAB 3: HISTORIAL DE RUTAS
+                     ============================================ -->
+                <div class="tab-pane fade" id="historial-rutas" role="tabpanel">
+                    <div class="card-canje">
+                        <h4 class="mb-4">
+                            <i class="fas fa-history me-2"></i>Historial de Rutas Completadas
+                        </h4>
+                        
+                        <div class="historial-container">
+                            {% if historial_rutas %}
+                                <div class="row">
+                                {% for ruta in historial_rutas %}
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="ruta-card">
+                                        <!-- Encabezado de la tarjeta -->
+                                        <div class="ruta-card-header">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h5 class="ruta-numero mb-0">
+                                                    <i class="fas fa-route me-2"></i>{{ ruta.nombre }}
+                                                </h5>
+                                                <span class="ruta-fecha">
+                                                    <i class="fas fa-calendar me-1"></i>{{ ruta.fecha }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Cuerpo de la tarjeta -->
+                                        <div class="ruta-card-body">
+                                            <!-- Sección de materiales -->
+                                            <div class="ruta-section">
+                                                <h6 class="section-title">
+                                                    <i class="fas fa-recycle me-2 text-success"></i>Materiales Recolectados
+                                                </h6>
+                                                <div class="materiales-info">
+                                                    <p class="material-detalle">{{ ruta.materiales_recolectados }}</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Peso y Puntos -->
+                                            <div class="row mt-3">
+                                                <div class="col-6">
+                                                    <div class="info-box peso-box">
+                                                        <i class="fas fa-weight-hanging me-2"></i>
+                                                        <div>
+                                                            <small class="text-muted d-block">Peso Total</small>
+                                                            <strong>{{ ruta.peso_total }}</strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="info-box puntos-box">
+                                                        <i class="fas fa-coins me-2"></i>
+                                                        <div>
+                                                            <small class="text-muted d-block">Puntos</small>
+                                                            <strong class="puntos-valor">{{ ruta.puntos_otorgados }}</strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {% if ruta.motivo_reagendamiento %}
+                                            <!-- Motivo de reagendamiento -->
+                                            <div class="ruta-section mt-3">
+                                                <div class="motivo-reagendamiento-card">
+                                                    <h6 class="motivo-title">
+                                                        <i class="fas fa-exclamation-circle me-2"></i>Motivo del Reagendamiento
+                                                    </h6>
+                                                    <p class="motivo-text">{{ ruta.motivo_reagendamiento }}</p>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <!-- Información del conductor (si está disponible) -->
+                                            {% if ruta.conductor_nombre or ruta.conductor_telefono or ruta.vehiculo %}
+                                            <div class="ruta-section mt-3">
+                                                <h6 class="section-title">
+                                                    <i class="fas fa-user-tie me-2 text-primary"></i>Información del Conductor
+                                                </h6>
+                                                <div class="conductor-info">
+                                                    {% if ruta.conductor_nombre %}
+                                                    <p class="conductor-detalle">
+                                                        <i class="fas fa-user me-2"></i>
+                                                        <strong>Nombre:</strong> {{ ruta.conductor_nombre }}
+                                                    </p>
+                                                    {% endif %}
+                                                    {% if ruta.conductor_telefono %}
+                                                    <p class="conductor-detalle">
+                                                        <i class="fas fa-phone me-2"></i>
+                                                        <strong>Contacto:</strong> {{ ruta.conductor_telefono }}
+                                                    </p>
+                                                    {% endif %}
+                                                    {% if ruta.vehiculo %}
+                                                    <p class="conductor-detalle">
+                                                        <i class="fas fa-truck me-2"></i>
+                                                        <strong>Vehículo:</strong> {{ ruta.vehiculo }}
+                                                    </p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                </div>
+                            {% else %}
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <h4>Sin historial de rutas</h4>
+                                <p>Aún no tienes rutas completadas</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalles de Reagendamiento -->
+    <div class="modal fade" id="detallesReagendamientoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none;">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Ruta Reagendada
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 25px;">
+                <!-- Información de la ruta -->
+                <div class="mb-3">
+                    <h6 class="fw-bold" style="color: #374151;">
+                        <i class="fas fa-route me-2 text-primary"></i><span id="modal_ruta_nombre"></span>
+                    </h6>
+                </div>
+
+                <!-- Material y detalles -->
+                <div class="info-detalle-box mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <i class="fas fa-leaf text-success me-2"></i>
+                            <strong>Material:</strong> <span id="modal_material"></span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <i class="fas fa-weight-hanging text-primary me-2"></i>
+                            <strong>Peso:</strong> <span id="modal_peso"></span> kg
+                        </div>
+                        <div>
+                            <i class="fas fa-coins text-warning me-2"></i>
+                            <strong>Puntos:</strong> <span id="modal_puntos" class="text-success fw-bold"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fecha original -->
+                <div class="alert alert-info mb-3" style="border-left: 4px solid #3b82f6;">
+                    <i class="fas fa-calendar-times me-2"></i>
+                    <strong>Fecha Original:</strong> <span id="modal_fecha_original"></span>
+                </div>
+
+                <!-- Motivo del reagendamiento -->
+                <div class="motivo-reagendamiento-box mb-3">
+                    <h6 class="fw-bold mb-2" style="color: #92400e;">
+                        <i class="fas fa-info-circle me-2"></i>Motivo del Reagendamiento
+                    </h6>
+                    <p id="modal_motivo" style="color: #78350f; margin: 0; line-height: 1.6;"></p>
+                </div>
+
+                <!-- Dirección -->
+                <div class="mb-3">
+                    <small class="text-muted"><i class="fas fa-map-marker-alt me-2"></i>Dirección:</small>
+                    <p id="modal_direccion" style="margin: 0; color: #374151;"></p>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 20px;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cerrar
+                </button>
+                <button type="button" class="btn btn-danger" onclick="cancelarRuta()">
+                    <i class="fas fa-ban me-2"></i>Cancelar Ruta
+                </button>
+                <button type="button" class="btn btn-success" onclick="reagendarRuta()">
+                    <i class="fas fa-calendar-alt me-2"></i>Reagendar
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+    <!-- Fin Modal Detalles -->
+
+    <!-- Modal de Reagendamiento (Fecha y Hora) -->
+    <div class="modal fade" id="modalReagendarRuta" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-calendar-check me-2"></i>Reagendar Recolección
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding: 30px;">
+                    <p class="text-muted mb-4">Selecciona la nueva fecha y hora para tu recolección</p>
+                    
+                    <form id="formReagendar">
+                        {% csrf_token %}
+                        <input type="hidden" id="reagendar_ruta_id" name="ruta_id">
+                        
+                        <div class="mb-4">
+                            <label for="reagendar_fecha" class="form-label fw-bold">
+                                <i class="fas fa-calendar me-2 text-primary"></i>Nueva Fecha *
+                            </label>
+                            <input type="date" class="form-control modern-input" 
+                                   id="reagendar_fecha" name="fecha" required>
+                            <small class="text-muted">Debe ser una fecha futura</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="reagendar_hora" class="form-label fw-bold">
+                                <i class="fas fa-clock me-2 text-primary"></i>Nueva Hora *
+                            </label>
+                            <select class="form-control modern-input" 
+                                    id="reagendar_hora" name="hora" required>
+                                <option value="">Seleccionar hora</option>
+                                <option value="08:00">08:00 AM</option>
+                                <option value="08:05">08:05 AM</option>
+                                <option value="08:10">08:10 AM</option>
+                                <option value="08:15">08:15 AM</option>
+                                <option value="08:20">08:20 AM</option>
+                                <option value="08:25">08:25 AM</option>
+                                <option value="08:30">08:30 AM</option>
+                                <option value="08:35">08:35 AM</option>
+                                <option value="08:40">08:40 AM</option>
+                                <option value="08:45">08:45 AM</option>
+                                <option value="08:50">08:50 AM</option>
+                                <option value="08:55">08:55 AM</option>
+                                <option value="09:00">09:00 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="12:00">12:00 PM</option>
+                                <option value="13:00">01:00 PM</option>
+                                <option value="14:00">02:00 PM</option>
+                                <option value="15:00">03:00 PM</option>
+                                <option value="16:00">04:00 PM</option>
+                                <option value="17:00">05:00 PM</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="reagendar_notas" class="form-label fw-bold">
+                                <i class="fas fa-comment me-2 text-primary"></i>Notas Adicionales
+                            </label>
+                            <textarea class="form-control modern-input" 
+                                      id="reagendar_notas" name="notas" rows="3" 
+                                      placeholder="Información adicional (opcional)"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 20px;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="confirmarReagendamiento()">
+                        <i class="fas fa-check me-2"></i>Confirmar Reagendamiento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Fin Modal Reagendar -->
+
+    <!-- Modal Reagendar Ruta Usuario -->
+    <div class="modal fade" id="modalReagendarRutaUsuario" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="fas fa-calendar-alt me-2"></i>Reagendar Ruta de Recolección
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formReagendarUsuario">
+                    {% csrf_token %}
+                    <input type="hidden" id="rutaIdReagendar" name="ruta_id">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="materialReagendar" class="form-label fw-bold">Material:</label>
+                            <input type="text" class="form-control" id="materialReagendar" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fechaReagendarUsuario" class="form-label fw-bold">Nueva Fecha *</label>
+                            <input type="date" class="form-control" id="fechaReagendarUsuario" name="fecha" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="horaReagendarUsuario" class="form-label fw-bold">Nueva Hora *</label>
+                            <input type="time" class="form-control" id="horaReagendarUsuario" name="hora" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notasReagendarUsuario" class="form-label fw-bold">Motivo del Reagendamiento (opcional)</label>
+                            <textarea class="form-control" id="notasReagendarUsuario" name="notas" rows="3" placeholder="¿Por qué necesita reagendar?"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-calendar-check me-2"></i>Confirmar Reagendamiento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Fin Modal Reagendar Ruta Usuario -->
+
+    <!-- Modal Cancelar Ruta -->
+    <div class="modal fade" id="modalCancelarRuta" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Cancelar Ruta de Recolección
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-warning me-2"></i><strong>Atención:</strong> Esta acción cancelará tu ruta de recolección.
+                    </div>
+                    <p>¿Estás seguro de que deseas cancelar la recolección de <strong id="materialCancelar"></strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Mantener</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmarCancelacion()">
+                        <i class="fas fa-trash me-2"></i>Sí, Cancelar Ruta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Fin Modal Cancelar Ruta -->
+
+    <!-- Modal de Confirmación de Solicitud -->
+
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    // Configuración de CSRF Token para JavaScript
+    const CSRF_TOKEN = '{{ csrf_token }}';
+</script>
+<script src="{% static 'js/rutasusuario.js' %}"></script>
+{% endblock %}

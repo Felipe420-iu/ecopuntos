@@ -1,0 +1,25 @@
+{
+  "name": "EcoPuntos - Reciclaje Inteligente",
+  "short_name": "EcoPuntos",
+  "description": "En EcoPuntos, lo imposible se convierte en puntos y los puntos en impacto. Recicla, gana puntos y ayuda al medio ambiente.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
+  "icons": [
+    {
+      "src": "/static/pwa/icons/eco.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities", "sustainability"],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "lang": "es-CO",
+  "dir": "ltr"
+}

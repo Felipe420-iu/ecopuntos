@@ -1,0 +1,430 @@
+/* ===============================================
+   ESTILOS MODERNOS PARA CATEGORÍAS DE RECICLAJE
+   =============================================== */
+
+/* Tarjetas principales con diseño moderno */
+.categoria-card-modern {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.categoria-card-modern:hover {
+  transform: translateY(-15px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+}
+
+/* Headers con gradientes únicos para cada categoría */
+.card-header-gradient {
+  height: 120px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.plasticos-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.vidrio-gradient {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.papel-gradient {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.metales-gradient {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+/* Badges modernos en el header */
+.category-badge-modern {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  padding: 8px 16px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Iconos del header */
+.category-icon-modern {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.category-icon-modern i {
+  font-size: 1.8rem;
+  color: white;
+}
+
+/* Área visual del video */
+.category-visual {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+}
+
+.background-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.1;
+  z-index: 1;
+}
+
+.plasticos-pattern {
+  background-image: radial-gradient(circle, #667eea 2px, transparent 2px);
+  background-size: 20px 20px;
+}
+
+.vidrio-pattern {
+  background-image: linear-gradient(45deg, #f093fb 25%, transparent 25%), 
+                    linear-gradient(-45deg, #f5576c 25%, transparent 25%);
+  background-size: 15px 15px;
+}
+
+.papel-pattern {
+  background-image: repeating-linear-gradient(45deg, #4facfe, #4facfe 2px, transparent 2px, transparent 8px);
+}
+
+.metales-pattern {
+  background-image: conic-gradient(from 45deg, #43e97b, #38f9d7, #43e97b);
+  background-size: 25px 25px;
+}
+
+.category-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: relative;
+  z-index: 2;
+}
+
+/* Overlay de estadísticas */
+.stats-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 20px;
+  z-index: 3;
+}
+
+.stat-circle {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.stat-circle.premium {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  border: 2px solid #FFD700;
+}
+
+.stat-number {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #333;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #666;
+  font-weight: 600;
+}
+
+/* Badges de impacto modernos */
+.impact-badge-modern {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.impact-badge-modern.high {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+}
+
+.impact-badge-modern.medium {
+  background: linear-gradient(135deg, #feca57, #ff9ff3);
+}
+
+.impact-badge-modern.maximum {
+  background: linear-gradient(135deg, #5f27cd, #a55eea);
+}
+
+/* Información de la categoría */
+.category-info {
+  padding: 25px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.category-title-modern {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.category-description {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+/* Beneficios */
+.category-benefits {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.benefit-tag {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.benefit-tag.eco {
+  background: linear-gradient(135deg, #e8f5e8, #d4edda);
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.benefit-tag.profit {
+  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+  border-color: #ffeeba;
+  color: #856404;
+}
+
+.benefit-tag.infinite {
+  background: linear-gradient(135deg, #e1ecf4, #bee5eb);
+  border-color: #abd5bd;
+  color: #0c5460;
+}
+
+.benefit-tag.pure {
+  background: linear-gradient(135deg, #f8d7da, #f1c0c7);
+  border-color: #f1b0b7;
+  color: #721c24;
+}
+
+.benefit-tag.nature {
+  background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+  border-color: #97d6e5;
+  color: #0c5460;
+}
+
+.benefit-tag.versatile {
+  background: linear-gradient(135deg, #e2e3e5, #d6d8db);
+  border-color: #c6c8ca;
+  color: #495057;
+}
+
+.benefit-tag.valuable {
+  background: linear-gradient(135deg, #fff3cd, #ffe8a1);
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+.benefit-tag.efficient {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border-color: #a3d4b0;
+  color: #155724;
+}
+
+/* Botones modernos de acción */
+.btn-reciclar-modern {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 15px;
+  padding: 15px 25px;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-reciclar-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+}
+
+/* Variaciones de color para cada categoría */
+.btn-reciclar-modern.plasticos {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-reciclar-modern.vidrio {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 8px 25px rgba(240, 147, 251, 0.3);
+}
+
+.btn-reciclar-modern.papel {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+}
+
+.btn-reciclar-modern.metales {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  box-shadow: 0 8px 25px rgba(67, 233, 123, 0.3);
+}
+
+/* Efectos del botón */
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+.btn-ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0);
+  border-radius: 50%;
+  transition: transform 0.6s ease;
+}
+
+.btn-reciclar-modern:active .btn-ripple {
+  transform: scale(4);
+  transition: transform 0.3s ease;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .categoria-card-modern {
+    margin-bottom: 30px;
+  }
+  
+  .card-header-gradient {
+    height: 100px;
+    padding: 15px;
+  }
+  
+  .category-icon-modern {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .category-icon-modern i {
+    font-size: 1.5rem;
+  }
+  
+  .category-visual {
+    height: 150px;
+  }
+  
+  .category-info {
+    padding: 20px;
+  }
+  
+  .category-title-modern {
+    font-size: 1.3rem;
+  }
+  
+  .btn-reciclar-modern {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Animaciones */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.categoria-card-modern:hover .category-icon-modern {
+  animation: float 2s ease-in-out infinite;
+}
+
+.categoria-card-modern:hover .stat-circle {
+  transform: scale(1.1);
+}
+
+/* Efectos de brillo */
+.categoria-card-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.categoria-card-modern:hover::before {
+  left: 100%;
+}

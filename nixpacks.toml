@@ -1,0 +1,20 @@
+# ===========================================
+# Nixpacks Configuration for Railway - EcoPuntos
+# ===========================================
+
+[phases.setup]
+nixPkgs = ["python311", "postgresql"]
+
+[phases.install]
+cmds = [
+    "pip install --upgrade pip",
+    "pip install -r requirements.txt"
+]
+
+[phases.build]
+cmds = [
+    "python manage.py collectstatic --noinput"
+]
+
+[start]
+cmd = "gunicorn proyecto2023.wsgi:application --bind 0.0.0.0:$PORT --workers 4 --threads 2 --worker-class gthread --timeout 120"
