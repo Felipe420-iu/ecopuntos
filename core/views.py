@@ -2780,15 +2780,12 @@ def rutas(request):
     
     # Filtrar rutas según el rol
     if request.user.role == 'conductor':
-        # Para conductores: mostrar rutas asignadas a él Y rutas pendientes sin asignar
+        # Para conductores: mostrar TODAS las RutaRecoleccion sin filtros
         try:
-            routes = RutaRecoleccion.objects.filter(
-                Q(conductor=request.user) |  # Rutas asignadas directamente al conductor
-                Q(conductor__isnull=True, estado__in=['planificada', 'programada'])  # Rutas pendientes sin conductor
-            ).order_by('-fecha_creacion')
+            routes = RutaRecoleccion.objects.all().order_by('-fecha_creacion')
         except:
             # Fallback a modelo Ruta si RutaRecoleccion no existe o tiene problemas
-            routes = Ruta.objects.filter(conductor=request.user).order_by('-fecha_creacion')
+            routes = Ruta.objects.all().order_by('-fecha_creacion')
     else:
         # Admins y superusers ven todas las rutas
         try:
