@@ -2779,17 +2779,24 @@ def rutas(request):
             barrios_zona_conductor_json = json.dumps(barrios_zona_conductor)
     
     # Filtrar rutas según el rol
-    if request.user.role == 'conductor' and zona_conductor:
-        # Los conductores ven todas las rutas ASIGNADAS A ELLOS (por conductor) o de su zona
-        # También ven rutas pendientes sin asignar para que puedan tomarlas
-        routes = Ruta.objects.filter(
-            Q(conductor=request.user) | 
-            Q(zona_asignada=zona_conductor) |
-            Q(conductor__isnull=True, zona_asignada__isnull=True, estado='pendiente')
-        ).order_by('-fecha_creacion')
+    if request.user.role == 'conductor':
+        # Para conductores: mostrar rutas asignadas a él Y rutas pendientes sin asignar
+        try:
+            routes = RutaRecoleccion.objects.filter(
+                Q(conductor=request.user) |  # Rutas asignadas directamente al conductor
+                Q(conductor__isnull=True, estado__in=['planificada', 'programada'])  # Rutas pendientes sin conductor
+            ).order_by('-fecha_creacion')
+        except:
+            # Fallback a modelo Ruta si RutaRecoleccion no existe o tiene problemas
+            routes = Ruta.objects.filter(conductor=request.user).order_by('-fecha_creacion')
     else:
         # Admins y superusers ven todas las rutas
-        routes = Ruta.objects.all().order_by('-fecha_creacion')
+        try:
+            routes = RutaRecoleccion.objects.all().order_by('-fecha_creacion')
+            if not routes.exists():
+                routes = Ruta.objects.all().order_by('-fecha_creacion')
+        except:
+            routes = Ruta.objects.all().order_by('-fecha_creacion')
     
     context = {
         'show_integrated_view': True,
@@ -4789,7 +4796,7 @@ def agendar_ruta_usuario(request):
                     fecha_programada=fecha_preferida,
                     hora_inicio=hora_preferida,
                     hora_fin_estimada=hora_fin,
-                    zona=zona,
+                    zona=zona_asignada,
                     estado='planificada'
                 )
                 
