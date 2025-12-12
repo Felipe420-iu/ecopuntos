@@ -419,3 +419,6 @@ function showToast(message, type = 'info') {
         toastElement.remove();
     });
 }
+
+// Asegurar que showDireccionModal esté disponible globalmente
+window.showDireccionModal = showDireccionModal;
