@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'channels',
+    'anymail',  # Envío de emails vía API (Brevo/Sendinblue)
     # 'django_ratelimit',  # Reemplazado por sistema personalizado más simple
     
     'core',
@@ -450,33 +451,22 @@ USE_I18N = True
 USE_L10N = True
 
 # ====================================
-# CONFIGURACIÓN DE EMAIL CON GMAIL SMTP
-# ====================================
-# Backend de email - SMTP para enviar emails reales
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# CONFIGURACIÓN DE EMAIL: Brevo (Sendinblue) via Anymail API
+# Se usa API HTTP para evitar bloqueos SMTP en Railway
+SENDINBLUE_API_KEY = config('SENDINBLUE_API_KEY', default='')
 
-# Configuración de Gmail SMTP
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
-
-# Credenciales de email (DEBEN estar configuradas en Railway)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-
-# Configuración adicional
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=f'EcoPuntos <{EMAIL_HOST_USER}>')
-SERVER_EMAIL = DEFAULT_FROM_EMAIL
-EMAIL_TIMEOUT = 30
-
-# Validación de configuración
-if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
-    import warnings
-    warnings.warn(
-        'EMAIL_HOST_USER o EMAIL_HOST_PASSWORD no están configurados. '
-        'El envío de emails fallará. Configura estas variables en Railway.',
-        RuntimeWarning
-    )
+if SENDINBLUE_API_KEY:
+    EMAIL_BACKEND = 'anymail.backends.sendinblue.EmailBackend'
+    ANYMAIL = {
+        'SENDINBLUE_API_KEY': SENDINBLUE_API_KEY,
+    }
+    DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='EcoPuntos <noreply@ecopuntos.com>')
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
+else:
+    # Fallback: consola en desarrollo para no romper
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'EcoPuntos <noreply@ecopuntos.com>'
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # ====================================
 # CONFIGURACIÓN DEL CHATBOT IA
