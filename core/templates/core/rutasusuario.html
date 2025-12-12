@@ -22,17 +22,6 @@
 
         <!-- Navegación por tabs -->
         <div class="content-wrapper">
-            <!-- Mensajes de Django -->
-            {% if messages %}
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
-                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                {% endfor %}
-            {% endif %}
-            
             <ul class="nav nav-tabs mb-4" id="rutasTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active modern-tab" id="mis-canjes-recoleccion-tab" 
@@ -121,8 +110,8 @@
                                             <strong>{{ canje_data.ruta_info.nombre }}</strong>
                                         </div>
                                         <div class="ruta-details">
-                                            <span class="ruta-estado badge bg-{{ canje_data.ruta_info.estado_color }}">
-                                                {{ canje_data.ruta_info.estado_display }}
+                                            <span class="ruta-estado ruta-{{ canje_data.ruta_info.estado }}">
+                                                {{ canje_data.ruta_info.get_estado_display }}
                                             </span>
                                             {% if canje_data.ruta_info.fecha_programada %}
                                             <div class="fecha-programada">
@@ -131,23 +120,20 @@
                                             </div>
                                             {% endif %}
                                         </div>
-                                        {% if canje_data.ruta_info.permite_reagendar or canje_data.ruta_info.permite_cancelar %}
-                                        <div class="botones-ruta mt-3 d-flex gap-2">
-                                            {% if canje_data.ruta_info.permite_reagendar %}
-                                            <button class="btn btn-sm btn-warning flex-grow-1" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#modalReagendarRutaUsuario"
-                                                    onclick="abrirModalReagendar({{ canje_data.ruta_info.id }}, '{{ canje_data.canje.material.nombre|escapejs }}', '{{ canje_data.ruta_info.fecha_programada|date:'Y-m-d' }}', '{{ canje_data.ruta_info.fecha_programada|date:'H:i' }}')">
-                                                <i class="fas fa-calendar-alt me-1"></i>Reagendar
-                                            </button>
-                                            {% endif %}
-                                            {% if canje_data.ruta_info.permite_cancelar %}
-                                            <button class="btn btn-sm btn-danger flex-grow-1" 
-                                                    onclick="confirmarCancelarRuta({{ canje_data.ruta_info.id }}, '{{ canje_data.canje.material.nombre|escapejs }}')">
-                                                <i class="fas fa-times me-1"></i>Cancelar
-                                            </button>
-                                            {% endif %}
-                                        </div>
+                                        {% if canje_data.ruta_info.estado == 'reagendada' %}
+                                        <button class="btn btn-sm btn-outline-primary mt-2 w-100" 
+                                                onclick="verDetallesReagendamiento({
+                                                    rutaId: {{ canje_data.ruta_info.id }},
+                                                    rutaNombre: '{{ canje_data.ruta_info.nombre|escapejs }}',
+                                                    material: '{{ canje_data.canje.material.nombre|escapejs }}',
+                                                    peso: '{{ canje_data.canje.peso }}',
+                                                    puntos: '{{ canje_data.canje.puntos }}',
+                                                    fechaOriginal: '{{ canje_data.ruta_info.fecha_programada|date:"d/m/Y H:i" }}',
+                                                    motivo: '{{ canje_data.ruta_info.motivo_reagendamiento|escapejs|default:"" }}',
+                                                    direccion: '{{ canje_data.canje.direccion_recoleccion|escapejs }}'
+                                                })">
+                                            <i class="fas fa-info-circle me-1"></i>Ver Detalles y Reagendar
+                                        </button>
                                         {% endif %}
                                     </div>
                                     {% else %}
@@ -704,76 +690,6 @@
         </div>
     </div>
     <!-- Fin Modal Reagendar -->
-
-    <!-- Modal Reagendar Ruta Usuario -->
-    <div class="modal fade" id="modalReagendarRutaUsuario" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title">
-                        <i class="fas fa-calendar-alt me-2"></i>Reagendar Ruta de Recolección
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="formReagendarUsuario">
-                    {% csrf_token %}
-                    <input type="hidden" id="rutaIdReagendar" name="ruta_id">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="materialReagendar" class="form-label fw-bold">Material:</label>
-                            <input type="text" class="form-control" id="materialReagendar" disabled>
-                        </div>
-                        <div class="mb-3">
-                            <label for="fechaReagendarUsuario" class="form-label fw-bold">Nueva Fecha *</label>
-                            <input type="date" class="form-control" id="fechaReagendarUsuario" name="fecha" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="horaReagendarUsuario" class="form-label fw-bold">Nueva Hora *</label>
-                            <input type="time" class="form-control" id="horaReagendarUsuario" name="hora" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="notasReagendarUsuario" class="form-label fw-bold">Motivo del Reagendamiento (opcional)</label>
-                            <textarea class="form-control" id="notasReagendarUsuario" name="notas" rows="3" placeholder="¿Por qué necesita reagendar?"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-calendar-check me-2"></i>Confirmar Reagendamiento
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- Fin Modal Reagendar Ruta Usuario -->
-
-    <!-- Modal Cancelar Ruta -->
-    <div class="modal fade" id="modalCancelarRuta" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Cancelar Ruta de Recolección
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning" role="alert">
-                        <i class="fas fa-warning me-2"></i><strong>Atención:</strong> Esta acción cancelará tu ruta de recolección.
-                    </div>
-                    <p>¿Estás seguro de que deseas cancelar la recolección de <strong id="materialCancelar"></strong>?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Mantener</button>
-                    <button type="button" class="btn btn-danger" onclick="confirmarCancelacion()">
-                        <i class="fas fa-trash me-2"></i>Sí, Cancelar Ruta
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Fin Modal Cancelar Ruta -->
 
     <!-- Modal de Confirmación de Solicitud -->
 
