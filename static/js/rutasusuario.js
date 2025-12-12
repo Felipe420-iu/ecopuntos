@@ -69,8 +69,6 @@ function setupFormSubmit() {
         tempForm.submit();
     });
 }
-    });
-}
 
 // ==========================================
 // GESTIÓN DE PASOS DEL FORMULARIO
