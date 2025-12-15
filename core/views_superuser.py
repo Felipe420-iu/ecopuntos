@@ -1,6 +1,17 @@
 from django.views.decorators.csrf import csrf_exempt
 from .permissions import require_superuser_ajax
 from django.views.decorators.http import require_http_methods
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.db.models import Q, Count
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+from .models import Usuario
+import json
+
 # --- API: Obtener datos de usuario para edición ---
 @require_superuser_ajax
 @require_http_methods(["GET"])
@@ -39,6 +50,21 @@ def editar_usuario_superuser(request, user_id):
         user.role = data.get('role', user.role)
         user.is_active = data.get('is_active', user.is_active)
         user.suspended = data.get('suspended', user.suspended)
+        
+        # Procesar zona_asignada si es conductor
+        if 'zona_asignada' in data:
+            zona_asignada = data.get('zona_asignada')
+            if user.role == 'conductor' and zona_asignada:
+                # Validar que la zona sea válida
+                zonas_validas = [choice[0] for choice in Usuario.ZONAS]
+                if zona_asignada in zonas_validas:
+                    user.zona_asignada = zona_asignada
+                else:
+                    return JsonResponse({'success': False, 'message': 'Zona asignada inválida.'})
+            elif user.role != 'conductor':
+                # Limpiar zona si no es conductor
+                user.zona_asignada = None
+        
         # Actualizar permisos de staff
         user.is_staff = user.role in ['admin', 'superuser']
         # Cambiar contraseña solo si se envía
@@ -49,15 +75,8 @@ def editar_usuario_superuser(request, user_id):
         return JsonResponse({'success': True, 'message': 'Usuario actualizado correctamente.'})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)})
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
-from django.core.paginator import Paginator
-from django.db.models import Q, Count
-from django.utils import timezone
-from django.contrib.auth import get_user_model
+
+# --- API: Eliminar usuario ---
 from .models import Usuario, Notificacion, SesionUsuario
 from .permissions import require_superuser, require_superuser_ajax, is_superuser_role
 from .notifications import NotificacionEmail

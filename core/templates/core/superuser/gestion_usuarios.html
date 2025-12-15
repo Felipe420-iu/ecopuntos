@@ -618,14 +618,6 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="edit_password" class="form-label">Nueva Contraseña (opcional)</label>
-                                <input type="password" class="form-control" id="edit_password" name="password" 
-                                       placeholder="Dejar vacío para no cambiar">
-                                <small class="text-muted">Mínimo 8 caracteres</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
                                 <label for="edit_role" class="form-label">Rol</label>
                                 <select class="form-select" id="edit_role" name="role" required>
                                     <option value="user">👤 Usuario Regular</option>
@@ -633,6 +625,28 @@
                                     <option value="admin">⚙️ Administrador</option>
                                     <option value="superuser">👑 Superusuario</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_zona_asignada" class="form-label">Zona Asignada (solo conductores)</label>
+                                <select class="form-select" id="edit_zona_asignada" name="zona_asignada">
+                                    <option value="">Sin zona asignada</option>
+                                    <option value="zona_1_sur">🌿 Zona 1 - Sur</option>
+                                    <option value="zona_2_centro">🏙️ Zona 2 - Centro</option>
+                                    <option value="zona_3_norte">🏔️ Zona 3 - Norte</option>
+                                </select>
+                                <small class="text-muted">Solo disponible para conductores</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="edit_password" class="form-label">Nueva Contraseña (opcional)</label>
+                                <input type="password" class="form-control" id="edit_password" name="password" 
+                                       placeholder="Dejar vacío para no cambiar">
+                                <small class="text-muted">Mínimo 8 caracteres</small>
                             </div>
                         </div>
                     </div>
@@ -943,8 +957,13 @@ function editarUsuario(userId) {
                 document.getElementById('edit_first_name').value = data.user.first_name;
                 document.getElementById('edit_last_name').value = data.user.last_name;
                 document.getElementById('edit_role').value = data.user.role;
+                document.getElementById('edit_zona_asignada').value = data.user.zona_asignada || '';
                 document.getElementById('edit_is_active').checked = data.user.is_active;
                 document.getElementById('edit_suspended').checked = data.user.suspended;
+                
+                // Configurar el campo zona según el rol
+                toggleZonaField();
+                
                 const modalElement = document.getElementById('editarUsuarioModal');
                 const modal = new bootstrap.Modal(modalElement);
                 modal.show();
@@ -964,6 +983,8 @@ function submitEditarUsuario() {
     const data = Object.fromEntries(formData);
     data.is_active = document.getElementById('edit_is_active').checked;
     data.suspended = document.getElementById('edit_suspended').checked;
+    // Incluir zona_asignada
+    data.zona_asignada = document.getElementById('edit_zona_asignada').value;
     if (!data.password) delete data.password;
     const userId = data.user_id;
     
@@ -1266,6 +1287,30 @@ function asignarZonaConductor(zona) {
 
 window.abrirMapaZonas = abrirMapaZonas;
 window.asignarZonaConductor = asignarZonaConductor;
+
+// Función para mostrar/ocultar campo zona según el rol
+function toggleZonaField() {
+    const roleSelect = document.getElementById('edit_role');
+    const zonaField = document.getElementById('edit_zona_asignada');
+    const zonaContainer = zonaField.parentElement;
+    
+    if (roleSelect.value === 'conductor') {
+        zonaContainer.style.display = 'block';
+        zonaField.disabled = false;
+    } else {
+        zonaContainer.style.display = 'none';
+        zonaField.disabled = true;
+        zonaField.value = ''; // Limpiar valor si no es conductor
+    }
+}
+
+// Agregar event listener cuando cambie el rol
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('edit_role');
+    if (roleSelect) {
+        roleSelect.addEventListener('change', toggleZonaField);
+    }
+});
 </script>
 
 <!-- Leaflet JavaScript -->

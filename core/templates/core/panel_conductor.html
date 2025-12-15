@@ -249,6 +249,24 @@
                 <div>
                     <strong>{{ user.username }}</strong>
                     <div class="text-muted small">Rol: Conductor</div>
+                    {% if user.zona_asignada %}
+                        <div class="text-success small">
+                            <i class="fas fa-map-marker-alt"></i> 
+                            {% if 'zona_1' in user.zona_asignada %}
+                                Zona 1 - Sur
+                            {% elif 'zona_2' in user.zona_asignada %}
+                                Zona 2 - Centro
+                            {% elif 'zona_3' in user.zona_asignada %}
+                                Zona 3 - Norte
+                            {% else %}
+                                {{ user.zona_asignada }}
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="text-warning small">
+                            <i class="fas fa-exclamation-triangle"></i> Sin zona asignada
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
