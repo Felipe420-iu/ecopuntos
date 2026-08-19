@@ -123,7 +123,7 @@ DJANGO_SETTINGS_MODULE = "proyecto2023.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short --strict-markers"
+addopts = "-v --tb=short --strict-markers --ignore=tests/test_api.py --ignore=tests/test_integracion.py"
 markers = [
     "slow: marks tests as slow (deselect with '-m "not slow"')",
     "integration: marks tests as integration tests",

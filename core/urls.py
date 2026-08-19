@@ -88,8 +88,6 @@ urlpatterns = [
     path('reactivate_user/<int:user_id>/', views.reactivate_user, name='reactivate_user'),
     path('unsuspend_user/<int:user_id>/', views.unsuspend_user, name='unsuspend_user'),
     path('verificar-sesion/', views.verificar_sesion_activa, name='verificar_sesion_activa'),
-    path('usuario-desactivado/', views.usuario_desactivado, name='usuario_desactivado'),
-    path('usuario-suspendido/', views.usuario_suspendido, name='usuario_suspendido'),
     path('get_chart_data/', views.get_chart_data, name='get_chart_data'),
     path('admin/canje/<int:canje_id>/procesar/', views.procesar_canje, name='procesar_canje'),
     path('rutasusuario/', views.rutasusuario, name='rutasusuario'),
@@ -143,20 +141,13 @@ urlpatterns = [
     path('api/password-recovery/send-code/', password_recovery.send_verification_code, name='password_recovery_send_code'),
     path('api/password-recovery/verify-code/', password_recovery.verify_code, name='password_recovery_verify_code'),
     path('api/password-recovery/reset-password/', password_recovery.reset_password, name='password_recovery_reset_password'),
+    path('api/password-recovery/check-email/', password_recovery.check_email_exists, name='check_email_exists'),
 
     path('cleanup-sessions/', views.cleanup_expired_sessions, name='cleanup_expired_sessions'),
     path('security-monitor/', views.security_monitor, name='security_monitor'),
     # Nuevas rutas para monitoreo de sesiones
-    path('admin/monitor-sesiones/', views.monitor_sesiones, name='monitor_sesiones'),
     path('admin/cerrar-sesion/<int:session_id>/', views.cerrar_sesion_admin, name='cerrar_sesion_admin'),
     path('admin/limpiar-sesiones/', views.limpiar_sesiones_admin, name='limpiar_sesiones_admin'),
-
-    
-    # APIs para recuperación de contraseña
-    path('api/password-recovery/send-code/', password_recovery.send_verification_code, name='send_verification_code'),
-    path('api/password-recovery/verify-code/', password_recovery.verify_code, name='verify_code'),
-    path('api/password-recovery/reset-password/', password_recovery.reset_password, name='reset_password'),
-    path('api/password-recovery/check-email/', password_recovery.check_email_exists, name='check_email_exists'),
     
     # APIs para términos y condiciones
     path('api/aceptar-terminos/', views.aceptar_terminos, name='aceptar_terminos'),

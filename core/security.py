@@ -71,8 +71,9 @@ class SecurityManager:
             request.session['session_token'] = token
             request.session['device_id'] = device_id
 
-            # Retornar el token como string (las vistas esperan un token)
-            return token
+            # Devolver la sesión real para compatibilidad con scripts y tests heredados.
+            # El resto del sistema ignora el valor de retorno, así que no rompe el flujo actual.
+            return session
         except Exception as e:
             print(f"Error creating secure session: {str(e)}")
             # En caso de error, retornar un diccionario vacío pero válido

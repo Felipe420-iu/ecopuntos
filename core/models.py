@@ -59,6 +59,9 @@ class Usuario(AbstractUser):
     puntos_juego_vidrios = models.IntegerField(default=0)  # Puntos acumulados en juegos de vidrios
     puntos_juego_papel = models.IntegerField(default=0)  # Puntos acumulados en el juego de papel y cartón
     puntos_juego_metales = models.IntegerField(default=0)  # Puntos acumulados en el juego de metales
+    nombres = models.CharField(max_length=100, blank=True, default='')
+    apellidos = models.CharField(max_length=100, blank=True, default='')
+    cedula = models.CharField(max_length=20, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     direccion = models.CharField(max_length=255, blank=True, null=True)
     fecha_registro = models.DateTimeField(auto_now_add=True)
@@ -657,6 +660,20 @@ class HistorialSeguimiento(models.Model):
     
     def __str__(self):
         return f"{self.seguimiento.codigo_seguimiento} - {self.get_estado_nuevo_display()}"
+
+# Compatibilidad con nombres antiguos de modelos usados por pruebas y módulos heredados.
+# Durante la refactorización se mantienen aliases para no romper imports antiguos.
+Material = MaterialTasa
+Redencion = RedencionPuntos
+
+# Alias de modelos de compatibilidad parcial para módulos legacy.
+# Nota: estos nombres apuntan a modelos actuales; la capa legacy se irá retirando progresivamente.
+__all__ = [
+    'Usuario', 'Material', 'Canje', 'RedencionPuntos', 'Redencion',
+    'Ruta', 'RutaRecoleccion', 'Recompensa', 'Categoria', 'Logro',
+    'Notificacion', 'Configuracion', 'ConversacionChatbot', 'MensajeChatbot',
+    'SeguimientoRecompensa', 'HistorialSeguimiento'
+]
 
 # ====================================
 # MODELOS DEL CHATBOT IA

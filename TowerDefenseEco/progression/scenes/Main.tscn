@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://bt5swl3x64q0y"]
+
+[ext_resource type="Script" path="res://progression/scripts/Main.gd" id="1"]
+[ext_resource type="PackedScene" path="res://progression/scenes/Tower.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://cixb0fikes2ie" path="res://progression/scenes/Enemy.tscn" id="3"]
+[ext_resource type="Script" path="res://progression/scripts/WaveManager.gd" id="4"]
+[ext_resource type="Texture2D" uid="uid://bltgilcc6tmj6" path="res://assets/desert_pack/castle_end.png" id="5"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1")
+tower_scene = ExtResource("2")
+
+[node name="SpawnPoint" type="Marker2D" parent="."]
+position = Vector2(100, 360)
+
+[node name="WaveManager" type="Node" parent="."]
+script = ExtResource("4")
+enemy_scene = ExtResource("3")
+target_x = 1050.0
+
+[node name="Castle" type="Sprite2D" parent="."]
+z_index = 20
+position = Vector2(1048, 290)
+scale = Vector2(1.45, 1.45)
+texture = ExtResource("5")
+
+[node name="Info" type="Label" parent="."]
+offset_left = 40.0
+offset_top = 20.0
+offset_right = 40.0
+offset_bottom = 20.0
+text = "Left click: place tower ($100) | Right click: upgrade nearest"

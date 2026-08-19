@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://path_tile_placeholder"]
+
+[node name="PathTile" type="Node2D"]
+
+[node name="Rect" type="ColorRect" parent="."]
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 64.0
+offset_bottom = 64.0
+color = Color(0.78, 0.67, 0.49, 1.0)

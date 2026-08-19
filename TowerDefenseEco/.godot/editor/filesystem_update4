@@ -1,2 +1,2 @@
-res://Main.tscn
-res://scripts/core/AudioManager.gd
+res://progression/scenes/Enemy.tscn
+res://progression/scenes/Main.tscn

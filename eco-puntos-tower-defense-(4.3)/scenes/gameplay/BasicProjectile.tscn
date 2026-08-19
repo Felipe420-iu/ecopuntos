@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://e4g7j9k5m2p8q"]
+
+[ext_resource type="Script" path="res://scripts/gameplay/projectiles/BasicProjectile.gd" id="1_projectile"]
+[ext_resource type="Script" path="res://scripts/gameplay/enemies/visual_placeholder.gd" id="2_vis"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 5.0
+
+[node name="BasicProjectile" type="CharacterBody2D"]
+script = ExtResource("1_projectile")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="Visual" type="Node2D" parent="."]
+script = ExtResource("2_vis")
+color = Color(1.0, 0.8, 0.2, 1.0)
+radius = 5.0

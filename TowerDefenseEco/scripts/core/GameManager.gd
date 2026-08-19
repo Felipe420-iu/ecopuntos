@@ -4,23 +4,31 @@ extends Node
 # EcoPuntos Tower Defense - Game Manager
 # ===================================
 
-signal game_state_changed(new_state: Constants.GameState)
+# Game States
+enum GameState {
+	MENU,
+	PLAYING,
+	PAUSED,
+	GAME_OVER,
+	VICTORY
+}
+
+signal game_state_changed(new_state: GameState)
 signal money_changed(new_amount: int)
 signal lives_changed(new_amount: int)
 signal score_changed(new_score: int)
-signal level_started(level_number: int, level_data: Dictionary)
-signal level_completed(level_number: int, eco_points_earned: int)
+signal level_completed(level: int, eco_points: int)
 signal game_over_triggered(final_score: int)
 
 # 🎮 Game State
-var current_state: Constants.GameState = Constants.GameState.MENU
+var current_state: GameState = GameState.MENU
 var current_level: int = 1
 var current_wave: int = 1
-var total_waves: int = 10
+var total_waves: int = 5
 
 # 💰 Economy
-var money: int = Constants.STARTING_MONEY
-var lives: int = Constants.STARTING_LIVES
+var money: int = 500
+var lives: int = 20
 var score: int = 0
 
 # 🏆 Progress
@@ -28,76 +36,93 @@ var eco_points_earned: int = 0
 var enemies_defeated: int = 0
 var towers_built: int = 0
 
-# 📊 Statistics
-var statistics = {
+# 🔗 External managers (set from the scene)
+var enemy_manager: Node = null
+var wave_manager: Node = null
+var tower_manager: Node = null
+var level_manager: Node = null
+var audio_manager: Node = null
+var eco_points_api: Node = null
+
+# ⏱️ Timers / stats
+var start_time: float = 0.0
+var pause_start_time: float = 0.0
+var total_pause_time: float = 0.0
+
+# 📊 Runtime statistics
+var statistics := {
 	"plastic_recycled": 0,
 	"glass_recycled": 0,
 	"paper_recycled": 0,
 	"metal_recycled": 0,
-	"total_recycled": 0,
-	"accuracy": 100.0,
-	"time_played": 0.0
+	"time_played": 0,
+	"total_recycled": 0
 }
 
-# 🔗 References to Managers
-var level_manager: LevelManager
-var wave_manager: WaveManager
-var tower_manager: TowerManager
-var enemy_manager: EnemyManager
-var ui_manager: UIManager
-var audio_manager: AudioManager
-var eco_points_api: EcoPuntosAPI
-
-# ⏱️ Time Management
-var start_time: float
-var pause_start_time: float
-var total_pause_time: float = 0.0
-
 func _ready():
-	# Initialize all managers
-	_setup_managers()
-	_setup_connections()
+	print("🎮 GameManager initialized successfully")
+	add_to_group("game_manager")
 	
 	# Set initial state
-	change_game_state(Constants.GameState.MENU)
+	change_game_state(GameState.PLAYING)
+
+func change_game_state(new_state: GameState):
+	"""Change game state and emit signal"""
+	current_state = new_state
+	game_state_changed.emit(new_state)
+	print("🔄 Game state changed to: ", new_state)
+
+func get_game_state() -> GameState:
+	"""Get current game state"""
+	return current_state
+
+func get_coins() -> int:
+	"""Get current money amount"""
+	return money
+
+func add_money(amount: int):
+	"""Add money to player"""
+	money += amount
+	money_changed.emit(money)
+	print("💰 Money added: +", amount, " Total: ", money)
+
+func spend_money(amount: int) -> bool:
+	"""Spend money if available"""
+	if money >= amount:
+		money -= amount
+		money_changed.emit(money)
+		print("💸 Money spent: -", amount, " Remaining: ", money)
+		return true
+	else:
+		print("❌ Not enough money! Need: ", amount, " Have: ", money)
+		return false
+
+func lose_life(amount: int = 1):
+	"""Lose lives and check game over"""
+	lives -= amount
+	lives_changed.emit(lives)
+	print("💔 Lives lost: -", amount, " Remaining: ", lives)
 	
-	print("🎮 GameManager initialized successfully")
+	if lives <= 0:
+		game_over()
 
-	# Make this node discoverable via groups
-	add_to_group("game_manager")
+func add_score(points: int):
+	"""Add score points"""
+	score += points
+	score_changed.emit(score)
+	print("🏆 Score added: +", points, " Total: ", score)
 
-func _setup_managers():
-	"""Initialize all manager nodes"""
-	# Find or create manager nodes
-	level_manager = get_node_or_create("LevelManager", LevelManager)
-	if level_manager: level_manager.add_to_group("level_manager")
-	wave_manager = get_node_or_create("WaveManager", WaveManager)
-	if wave_manager: wave_manager.add_to_group("wave_manager")
-	tower_manager = get_node_or_create("TowerManager", TowerManager)
-	if tower_manager: tower_manager.add_to_group("tower_manager")
-	enemy_manager = get_node_or_create("EnemyManager", EnemyManager)
-	if enemy_manager: enemy_manager.add_to_group("enemy_manager")
-	ui_manager = get_node_or_create("UIManager", UIManager)
-	if ui_manager: ui_manager.add_to_group("ui_manager")
-	audio_manager = get_node_or_create("AudioManager", AudioManager)
-	if audio_manager: audio_manager.add_to_group("audio_manager")
-	eco_points_api = get_node_or_create("EcoPuntosAPI", EcoPuntosAPI)
-	if eco_points_api: eco_points_api.add_to_group("api_manager")
+func game_over():
+	"""Handle game over"""
+	print("💀 GAME OVER! Final Score: ", score)
+	change_game_state(GameState.GAME_OVER)
 
-func get_node_or_create(node_name: String, node_class):
-	"""Get existing node or create new one"""
-	var existing_node = get_node_or_null(node_name)
-	if existing_node:
-		return existing_node
-	
-	var new_node = node_class.new()
-	new_node.name = node_name
-	add_child(new_node)
-	return new_node
-
-func _setup_connections():
-	"""Setup signal connections between managers"""
-	# Enemy Manager connections
+func enemy_killed(enemy_type: Constants.EnemyType, money_reward: int, score_reward: int):
+	"""Handle enemy being killed"""
+	enemies_defeated += 1
+	add_money(money_reward)
+	add_score(score_reward)
+	print("👾 Enemy defeated! Type: ", enemy_type)
 	if enemy_manager:
 		enemy_manager.enemy_defeated.connect(_on_enemy_defeated)
 		enemy_manager.enemy_reached_end.connect(_on_enemy_reached_end)
@@ -111,27 +136,6 @@ func _setup_connections():
 	# Tower Manager connections
 	if tower_manager:
 		tower_manager.tower_built.connect(_on_tower_built)
-
-func change_game_state(new_state: Constants.GameState):
-	"""Change current game state"""
-	var old_state = current_state
-	current_state = new_state
-	
-	# Handle state transitions
-	match new_state:
-		Constants.GameState.PLAYING:
-			_start_game()
-		Constants.GameState.PAUSED:
-			_pause_game()
-		Constants.GameState.GAME_OVER:
-			_game_over()
-		Constants.GameState.VICTORY:
-			_victory()
-		Constants.GameState.MENU:
-			_return_to_menu()
-	
-	game_state_changed.emit(new_state)
-	print("🔄 Game state changed: ", old_state, " → ", new_state)
 
 func _start_game():
 	"""Start the game"""
@@ -168,7 +172,7 @@ func _resume_game():
 		total_pause_time += Time.get_unix_time_from_system() - pause_start_time
 		pause_start_time = 0
 	get_tree().paused = false
-	change_game_state(Constants.GameState.PLAYING)
+	change_game_state(GameState.PLAYING)
 
 func _game_over():
 	"""Handle game over"""
@@ -199,33 +203,6 @@ func _return_to_menu():
 	get_tree().paused = false
 	current_level = 1
 	current_wave = 1
-
-# 💰 Economy Management
-func add_money(amount: int):
-	"""Add money to player"""
-	money += amount
-	money_changed.emit(money)
-
-func spend_money(amount: int) -> bool:
-	"""Try to spend money"""
-	if money >= amount:
-		money -= amount
-		money_changed.emit(money)
-		return true
-	return false
-
-func lose_life(amount: int = 1):
-	"""Lose lives"""
-	lives -= amount
-	lives_changed.emit(lives)
-	
-	if lives <= 0:
-		change_game_state(Constants.GameState.GAME_OVER)
-
-func add_score(amount: int):
-	"""Add score"""
-	score += amount
-	score_changed.emit(score)
 
 # 🏆 Progress Tracking
 func _calculate_final_statistics():
@@ -315,7 +292,7 @@ func _on_wave_completed(wave_number: int):
 
 func _on_all_waves_completed():
 	"""Handle all waves completed (level victory)"""
-	change_game_state(Constants.GameState.VICTORY)
+	change_game_state(GameState.VICTORY)
 
 func _on_tower_built(tower_type: Constants.TowerType, _cost: int):
 	"""Handle tower built"""
@@ -323,7 +300,7 @@ func _on_tower_built(tower_type: Constants.TowerType, _cost: int):
 
 # 🎯 Public API for external access
 func is_playing() -> bool:
-	return current_state == Constants.GameState.PLAYING
+	return current_state == GameState.PLAYING
 
 func add_coins(amount: int) -> void:
 	"""Alias para compatibilidad: añade monedas"""
@@ -366,11 +343,3 @@ func load_game_data(key: String) -> Dictionary:
 	print("📂 Loading data for key: ", key)
 	# TODO: Implement actual load system
 	return {}
-
-func get_game_state() -> int:
-	"""Get current game state"""
-	return current_state
-
-func get_coins() -> int:
-	"""Get current coins amount"""
-	return money

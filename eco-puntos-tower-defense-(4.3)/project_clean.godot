@@ -1,0 +1,29 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section_key]
+;   parameter=value
+
+[application]
+
+config/name="EcoPuntos Tower Defense"
+config/version="1.0.0"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.3")
+
+[autoload]
+
+GameManager="*res://scripts/core/GameManager.gd"
+Constants="*res://scripts/utils/Constants.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/resizable=true
+
+[rendering]
+
+renderer/rendering_method="forward_plus"

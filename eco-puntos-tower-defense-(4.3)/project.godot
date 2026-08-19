@@ -1,0 +1,22 @@
+config_version=5
+
+[application]
+
+config/name="EcoPuntos Tower Defense (4.3)"
+config/version="1.0.0"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
+
+[autoload]
+
+GameManager="*res://scripts/core/GameManager.gd"
+Constants="*res://scripts/utils/Constants.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
+[editor]
+
+version_control/autoload_on_startup=true

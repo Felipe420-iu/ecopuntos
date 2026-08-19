@@ -13,7 +13,7 @@ config_version=5
 config/name="EcoPuntos Tower Defense"
 config/version="1.0.0"
 run/main_scene="res://Main.tscn"
-config/features=PackedStringArray("4.3")
+config/features=PackedStringArray("4.3", "Forward Plus")
 
 [autoload]
 

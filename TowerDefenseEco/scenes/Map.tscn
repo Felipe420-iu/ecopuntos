@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://map_placeholder"]
+
+[ext_resource type="Script" path="res://scripts/Map.gd" id="1_map_script"]
+
+[node name="Map" type="Node2D"]
+script = ExtResource("1_map_script")
+
+[node name="Ground" type="TileMap" parent="."]
+format = 2
+cell_quadrant_size = 64
+cell_custom_transform = Transform2D(1, 0, 0, 1, 0, 0)
+collision_animatable = false
+navigation_enabled = false
+rendering_quadrant_size = 64
+y_sort_enabled = false
